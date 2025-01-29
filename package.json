@@ -8,7 +8,9 @@
     "start:frontend": "npm --prefix frontend start",
     "build": "npm run build:frontend",
     "build:frontend": "npm --prefix frontend run build",
-    "heroku-postbuild": "npm run build:frontend && npm install --prefix backend"
+    "heroku-postbuild": "npm run build:frontend && npm install --prefix backend",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run start:frontend\"",
+    "dev:backend": "nodemon backend/server.js"
   },
   "keywords": [],
   "author": "",
