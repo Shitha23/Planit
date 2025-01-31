@@ -1,23 +1,25 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import app from "./firebaseConfig";
 
 function App() {
+  console.log("Firebase App:", app);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div className="bg-lightBlue text-navyBlue font-sans p-18 rounded-xl">
+        <h1 className="text-mediumBlue text-2xl font-bold">
+          Welcome to Plan-It
+        </h1>
+        {app ? (
+          <p className="text-mediumBlue text-lg font-semibold">
+            Firebase is initialized
+          </p>
+        ) : (
+          <p className="text-mediumBlue text-lg font-semibold">
+            Firebase is not initialized
+          </p>
+        )}
+      </div>
     </div>
   );
 }
