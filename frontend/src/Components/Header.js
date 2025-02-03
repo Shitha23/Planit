@@ -39,7 +39,7 @@ const Header = ({ onOpenLogin, onOpenSignup }) => {
               Book Ticket
             </a>
             <a href="#" className="text-mediumBlue hover:text-deepBlue">
-              Organize Event
+              Volunteer an Event
             </a>
             <a href="#" className="text-mediumBlue hover:text-deepBlue">
               Sponsor an Event
