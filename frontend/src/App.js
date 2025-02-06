@@ -7,17 +7,33 @@ import "./App.css";
 import Home from "./Pages/Home";
 
 function App() {
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [isSignupOpen, setIsSignupOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalTitle, setModalTitle] = useState("");
+  const [authType, setAuthType] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
+  const openLoginModal = () => {
+    setModalTitle("Log In");
+    setAuthType("login");
+    setIsModalOpen(true);
+  };
+
+  const openSignupModal = () => {
+    setModalTitle("Sign Up");
+    setAuthType("signup");
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setAuthType("");
+    setModalTitle("");
+  };
+
   return (
     <div className="App flex flex-col min-h-screen">
-      <Header
-        onOpenLogin={() => setIsLoginOpen(true)}
-        onOpenSignup={() => setIsSignupOpen(true)}
-      />
+      <Header onOpenLogin={openLoginModal} onOpenSignup={openSignupModal} />
 
       <div className="flex-grow">
         {successMessage && (
@@ -44,29 +60,18 @@ function App() {
           </div>
         )}
 
-        <Modal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)}>
+        <Modal isOpen={isModalOpen} onClose={closeModal} Title={modalTitle}>
           <AuthForm
-            type="login"
-            onClose={() => setIsLoginOpen(false)}
-            setSuccessMessage={setSuccessMessage}
-            setErrorMessage={setErrorMessage}
-          />
-        </Modal>
-
-        <Modal isOpen={isSignupOpen} onClose={() => setIsSignupOpen(false)}>
-          <AuthForm
-            type="signup"
-            onClose={() => setIsSignupOpen(false)}
+            type={authType}
+            onClose={closeModal}
             setSuccessMessage={setSuccessMessage}
             setErrorMessage={setErrorMessage}
           />
         </Modal>
       </div>
+
       <Home />
-      <Footer
-        onOpenLogin={() => setIsLoginOpen(true)}
-        onOpenSignup={() => setIsSignupOpen(true)}
-      />
+      <Footer onOpenLogin={openLoginModal} onOpenSignup={openSignupModal} />
     </div>
   );
 }
