@@ -1,37 +1,60 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import app from "../firebaseConfig";
 
 const Header = ({ onOpenLogin, onOpenSignup }) => {
   const [user, setUser] = useState(null);
+  const [userName, setUserName] = useState(
+    localStorage.getItem("userName") || ""
+  );
 
   useEffect(() => {
-    const auth = getAuth();
+    const auth = getAuth(app);
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+      if (currentUser) {
+        setUser(currentUser);
+        setUserName(localStorage.getItem("userName") || "User");
+      } else {
+        setUser(null);
+        setUserName("");
+      }
     });
 
-    return () => unsubscribe();
+    const updateUserFromEvent = () => {
+      setUserName(localStorage.getItem("userName") || "User");
+    };
+    window.addEventListener("userLoggedIn", updateUserFromEvent);
+
+    return () => {
+      unsubscribe();
+      window.removeEventListener("userLoggedIn", updateUserFromEvent);
+    };
   }, []);
 
   const handleLogout = async () => {
-    const auth = getAuth();
+    const auth = getAuth(app);
     await signOut(auth);
+    setUser(null);
+    setUserName("");
+    localStorage.removeItem("userName");
   };
 
   return (
-    <header className="bg-white shadow-lg p-4">
-      <div className="container mx-auto flex justify-between items-center relative">
+    <header className="bg-white shadow-lg p-4 w-full">
+      <div className="container mx-auto flex flex-wrap justify-between items-center relative">
         <div className="flex items-center">
           <img
             src="/Images/logo-header.png"
             alt="Company Logo"
             className="h-10 rounded-full mr-2"
           />
-          <span className="text-navyBlue font-bold text-l">Plan It</span>
+          <span className="text-navyBlue font-bold text-sm sm:text-lg">
+            Plan It
+          </span>
         </div>
 
         {user && (
-          <nav className="absolute left-1/2 transform -translate-x-1/2 space-x-8">
+          <nav className="hidden md:flex absolute left-1/2 transform -translate-x-1/2 space-x-4 text-sm sm:text-md">
             <a href="#" className="text-mediumBlue hover:text-deepBlue">
               Home
             </a>
@@ -47,13 +70,15 @@ const Header = ({ onOpenLogin, onOpenSignup }) => {
           </nav>
         )}
 
-        <nav className="space-x-4 flex items-center">
+        <nav className="flex items-center space-x-2 sm:space-x-4">
           {user ? (
-            <div className="flex items-center space-x-4">
-              <span className="text-red-500">{user.email}</span>
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <span className="text-black font-medium text-sm sm:text-md">
+                Welcome, {userName}
+              </span>
               <button
                 onClick={handleLogout}
-                className="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-700"
+                className="bg-red-500 text-white text-xs sm:text-sm py-2 px-3 sm:px-4 rounded-lg hover:bg-red-700"
               >
                 Logout
               </button>
@@ -62,13 +87,13 @@ const Header = ({ onOpenLogin, onOpenSignup }) => {
             <>
               <button
                 onClick={onOpenLogin}
-                className="bg-mediumBlue text-white py-2 px-4 rounded-lg hover:bg-deepBlue"
+                className="bg-mediumBlue text-white text-xs sm:text-sm py-2 px-3 sm:px-4 rounded-lg hover:bg-deepBlue"
               >
                 Login
               </button>
               <button
                 onClick={onOpenSignup}
-                className="bg-navyBlue text-white py-2 px-4 rounded-lg hover:bg-deepBlue"
+                className="bg-navyBlue text-white text-xs sm:text-sm py-2 px-3 sm:px-4 rounded-lg hover:bg-deepBlue"
               >
                 Signup
               </button>
