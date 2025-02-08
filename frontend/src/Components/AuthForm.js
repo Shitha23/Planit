@@ -15,6 +15,7 @@ import { FaEye, FaEyeSlash, FaGoogle } from "react-icons/fa";
 const AuthForm = ({ type, onClose, setSuccessMessage, setErrorMessage }) => {
   const auth = getAuth(app);
   const googleProvider = new GoogleAuthProvider();
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -25,6 +26,8 @@ const AuthForm = ({ type, onClose, setSuccessMessage, setErrorMessage }) => {
       confirmPassword: "",
     }),
   });
+
+  const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -32,18 +35,53 @@ const AuthForm = ({ type, onClose, setSuccessMessage, setErrorMessage }) => {
   const toggleConfirmPasswordVisibility = () =>
     setShowConfirmPassword(!showConfirmPassword);
 
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (type === "signup") {
+      if (!formData.name.trim() || formData.name.length < 3) {
+        newErrors.name = "Name must be at least 3 characters long.";
+      }
+
+      if (!/^\d{10}$/.test(formData.phone)) {
+        newErrors.phone = "Phone number must be 10 digits.";
+      }
+
+      if (!formData.address.trim() || formData.address.length < 5) {
+        newErrors.address = "Address must be at least 5 characters long.";
+      }
+    }
+
+    if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
+      newErrors.email = "Invalid email format.";
+    }
+
+    if (
+      !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
+        formData.password
+      )
+    ) {
+      newErrors.password =
+        "Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character.";
+    }
+
+    if (type === "signup" && formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleAuth = async (e) => {
     e.preventDefault();
     setErrorMessage("");
     setSuccessMessage("");
 
+    if (!validateForm()) return;
+
     try {
       if (type === "signup") {
-        if (formData.password !== formData.confirmPassword) {
-          setErrorMessage("Passwords do not match!");
-          return;
-        }
-
         const userCredential = await createUserWithEmailAndPassword(
           auth,
           formData.email,
@@ -70,7 +108,6 @@ const AuthForm = ({ type, onClose, setSuccessMessage, setErrorMessage }) => {
           formData.email,
           formData.password
         );
-
         const user = userCredential.user;
 
         const response = await axios.get(
@@ -132,6 +169,8 @@ const AuthForm = ({ type, onClose, setSuccessMessage, setErrorMessage }) => {
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             required
           />
+          {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+
           <input
             type="text"
             name="phone"
@@ -142,6 +181,10 @@ const AuthForm = ({ type, onClose, setSuccessMessage, setErrorMessage }) => {
             }
             required
           />
+          {errors.phone && (
+            <p className="text-red-500 text-sm">{errors.phone}</p>
+          )}
+
           <input
             type="text"
             name="address"
@@ -152,8 +195,12 @@ const AuthForm = ({ type, onClose, setSuccessMessage, setErrorMessage }) => {
             }
             required
           />
+          {errors.address && (
+            <p className="text-red-500 text-sm">{errors.address}</p>
+          )}
         </>
       )}
+
       <input
         type="email"
         name="email"
@@ -162,6 +209,8 @@ const AuthForm = ({ type, onClose, setSuccessMessage, setErrorMessage }) => {
         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
         required
       />
+      {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+
       <div className="relative">
         <input
           type={showPassword ? "text" : "password"}
@@ -181,6 +230,10 @@ const AuthForm = ({ type, onClose, setSuccessMessage, setErrorMessage }) => {
           {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
         </button>
       </div>
+      {errors.password && (
+        <p className="text-red-500 text-sm">{errors.password}</p>
+      )}
+
       {type === "signup" && (
         <div className="relative">
           <input
@@ -206,17 +259,16 @@ const AuthForm = ({ type, onClose, setSuccessMessage, setErrorMessage }) => {
           </button>
         </div>
       )}
-      <button
-        type="submit"
-        className="bg-mediumBlue text-white py-2 px-4 rounded-lg hover:bg-deepBlue"
-      >
+
+      <button type="submit" className="bg-blue-500 text-white py-2 rounded">
         {type === "signup" ? "Sign Up" : "Log In"}
       </button>
+
       {type === "login" && (
         <button
           type="button"
           onClick={handleGoogleSignIn}
-          className="bg-red-500 text-white py-2 px-4 rounded-lg flex items-center justify-center gap-2 hover:bg-red-700"
+          className="bg-red-500 text-white py-2 rounded flex items-center justify-center gap-2"
         >
           <FaGoogle size={20} /> Log In with Google
         </button>
