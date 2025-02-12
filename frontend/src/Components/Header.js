@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import app from "../firebaseConfig";
 
@@ -7,16 +8,36 @@ const Header = ({ onOpenLogin, onOpenSignup }) => {
   const [userName, setUserName] = useState(
     localStorage.getItem("userName") || ""
   );
+  const [userRole, setUserRole] = useState(
+    localStorage.getItem("userRole") || "customer"
+  );
 
   useEffect(() => {
     const auth = getAuth(app);
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
         setUserName(localStorage.getItem("userName") || "User");
+
+        try {
+          const response = await fetch(
+            `http://localhost:5000/api/auth/user/${currentUser.uid}`
+          );
+          if (!response.ok) {
+            throw new Error("Failed to fetch role");
+          }
+          const data = await response.json();
+          setUserRole(data.role);
+          localStorage.setItem("userRole", data.role);
+        } catch (error) {
+          console.error("Error fetching user role:", error);
+          setUserRole("customer");
+        }
       } else {
         setUser(null);
         setUserName("");
+        setUserRole("customer");
+        localStorage.removeItem("userRole");
       }
     });
 
@@ -36,7 +57,9 @@ const Header = ({ onOpenLogin, onOpenSignup }) => {
     await signOut(auth);
     setUser(null);
     setUserName("");
+    setUserRole("customer");
     localStorage.removeItem("userName");
+    localStorage.removeItem("userRole");
   };
 
   return (
@@ -55,18 +78,39 @@ const Header = ({ onOpenLogin, onOpenSignup }) => {
 
         {user && (
           <nav className="hidden md:flex absolute left-1/2 transform -translate-x-1/2 space-x-4 text-sm sm:text-md">
-            <a href="#" className="text-mediumBlue hover:text-deepBlue">
+            <a href="/" className="text-mediumBlue hover:text-deepBlue">
               Home
             </a>
-            <a href="#" className="text-mediumBlue hover:text-deepBlue">
-              Book Ticket
-            </a>
-            <a href="#" className="text-mediumBlue hover:text-deepBlue">
-              Organize Event
-            </a>
-            <a href="#" className="text-mediumBlue hover:text-deepBlue">
-              Sponsor an Event
-            </a>
+
+            {userRole === "customer" && (
+              <>
+                <a href="#" className="text-mediumBlue hover:text-deepBlue">
+                  Book Ticket
+                </a>
+                <a href="#" className="text-mediumBlue hover:text-deepBlue">
+                  Volunteer an Event
+                </a>
+                <a href="#" className="text-mediumBlue hover:text-deepBlue">
+                  Sponsor an Event
+                </a>
+              </>
+            )}
+            {userRole === "organizer" && (
+              <>
+                <Link
+                  to="/events"
+                  className="text-mediumBlue hover:text-deepBlue"
+                >
+                  Organize Event
+                </Link>
+                <a href="#" className="text-mediumBlue hover:text-deepBlue">
+                  Ticket Analysis
+                </a>
+                <a href="#" className="text-mediumBlue hover:text-deepBlue">
+                  Customer Queries
+                </a>
+              </>
+            )}
           </nav>
         )}
 
