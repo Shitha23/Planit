@@ -84,7 +84,10 @@ const Header = ({ onOpenLogin, onOpenSignup }) => {
 
             {userRole === "customer" && (
               <>
-                <a href="#" className="text-mediumBlue hover:text-deepBlue">
+                <a
+                  href="/book-ticket"
+                  className="text-mediumBlue hover:text-deepBlue"
+                >
                   Book Ticket
                 </a>
                 <a href="#" className="text-mediumBlue hover:text-deepBlue">
