@@ -38,6 +38,16 @@ router.get("/events", async (req, res) => {
   }
 });
 
+// Get all events
+router.get("/ticketevents", async (req, res) => {
+  try {
+    const events = await Event.find();
+    res.json(events);
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching events" });
+  }
+});
+
 // Update Event
 router.put("/event/:id", async (req, res) => {
   try {

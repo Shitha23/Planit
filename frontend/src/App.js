@@ -15,6 +15,8 @@ import EventDetailsPage from "./Pages/EventDetailsPage";
 import Home from "./Pages/Home";
 import EventsPage from "./Pages/EventsPage";
 import "./App.css";
+import BookTicketPage from "./Pages/BookTicketPage";
+import EventDetailsForBooking from "./Pages/EventDetailsForBooking";
 
 const PrivateRoute = ({ requiredRole }) => {
   const [user, setUser] = useState(null);
@@ -115,6 +117,11 @@ function App() {
 
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/book-ticket" element={<BookTicketPage />} />
+            <Route
+              path="/book-ticket/:id"
+              element={<EventDetailsForBooking />}
+            />
             <Route element={<PrivateRoute requiredRole="organizer" />}>
               <Route path="/events" element={<EventsPage />} />
               <Route path="/events/:id" element={<EventDetailsPage />} />
