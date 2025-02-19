@@ -1,12 +1,19 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { FaMapMarkerAlt, FaClock, FaRedo, FaUsers } from "react-icons/fa";
+import {
+  FaMapMarkerAlt,
+  FaClock,
+  FaRedo,
+  FaUsers,
+  FaShoppingCart,
+} from "react-icons/fa";
 
-const EventDetailsForBooking = ({ addToCart }) => {
+const EventDetailsForBooking = ({ cart, setCart }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [event, setEvent] = useState(null);
   const [quantity, setQuantity] = useState(1);
+  const [alert, setAlert] = useState(null);
 
   useEffect(() => {
     fetch(`http://localhost:5000/api/event/${id}`)
@@ -22,12 +29,50 @@ const EventDetailsForBooking = ({ addToCart }) => {
     return `${formattedHour}:${minute} ${ampm}`;
   };
 
-  const handleAddToCart = () => {};
+  const handleAddToCart = () => {
+    if (!event) return;
+
+    let newCart = [...cart];
+    const existingItem = newCart.find((item) => item._id === event._id);
+
+    if (existingItem) {
+      if (existingItem.quantity >= 2) {
+        setAlert({
+          type: "error",
+          message: "Max 2 tickets allowed per event!",
+        });
+        return;
+      }
+      newCart = newCart.map((item) =>
+        item._id === event._id
+          ? { ...item, quantity: Math.min(item.quantity + quantity, 2) }
+          : item
+      );
+    } else {
+      newCart.push({ ...event, quantity });
+    }
+
+    setCart(newCart);
+    setAlert({ type: "success", message: "Tickets added to cart!" });
+    setTimeout(() => setAlert(null), 3000);
+  };
 
   if (!event) return <p className="text-gray-500 text-center">Loading...</p>;
 
   return (
     <div className="container mx-auto p-6">
+      {alert && (
+        <div
+          className={`fixed bottom-5 right-5 px-4 py-2 rounded-md shadow-md ${
+            alert.type === "success"
+              ? "bg-green-500 text-white"
+              : "bg-red-500 text-white"
+          }`}
+        >
+          {alert.message}
+        </div>
+      )}
+
       <nav className="flex text-gray-600 text-sm mb-4">
         <Link to="/" className="hover:text-navyBlue">
           Home
@@ -84,27 +129,30 @@ const EventDetailsForBooking = ({ addToCart }) => {
         </div>
 
         <div className="flex flex-col justify-between">
-          <div className="flex items-center">
+          <div className="flex items-center gap-4">
             <span className="text-lg text-gray-800 font-semibold">
               Quantity:
             </span>
-            <input
-              type="number"
-              value={quantity}
-              onChange={(e) =>
-                setQuantity(Math.max(1, Math.min(2, e.target.value)))
-              }
-              className="ml-3 w-20 px-3 py-2 border border-gray-300 rounded-xl text-lg text-center"
-              min="1"
-              max="2"
-            />
+            <button
+              onClick={() => setQuantity(Math.max(1, quantity - 1))}
+              className="bg-gray-300 px-3 py-1 rounded-lg"
+            >
+              -
+            </button>
+            <span className="text-lg">{quantity}</span>
+            <button
+              onClick={() => setQuantity(Math.min(2, quantity + 1))}
+              className="bg-gray-300 px-3 py-1 rounded-lg"
+            >
+              +
+            </button>
           </div>
 
           <button
             onClick={handleAddToCart}
-            className="mt-6 bg-mediumBlue hover:bg-deepBlue text-white text-lg font-semibold px-6 py-3 rounded-xl w-full"
+            className="mt-6 bg-mediumBlue hover:bg-deepBlue text-white text-lg font-semibold px-6 py-3 rounded-xl flex items-center gap-2 justify-center"
           >
-            Add to Cart
+            <FaShoppingCart /> Add to Cart
           </button>
         </div>
       </div>

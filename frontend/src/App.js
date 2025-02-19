@@ -14,6 +14,7 @@ import AuthForm from "./Components/AuthForm";
 import EventDetailsPage from "./Pages/EventDetailsPage";
 import Home from "./Pages/Home";
 import EventsPage from "./Pages/EventsPage";
+import CartPage from "./Pages/CartPage";
 import "./App.css";
 import BookTicketPage from "./Pages/BookTicketPage";
 import EventDetailsForBooking from "./Pages/EventDetailsForBooking";
@@ -55,8 +56,20 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [authType, setAuthType] = useState("");
+  const [cart, setCart] = useState([]);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    const savedCart = JSON.parse(localStorage.getItem("cart")) || [];
+    setCart(savedCart);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }, [cart]);
+
+
 
   const openLoginModal = () => {
     setModalTitle("Log In");
@@ -79,11 +92,15 @@ function App() {
   return (
     <Router>
       <div className="App flex flex-col min-h-screen">
-        <Header onOpenLogin={openLoginModal} onOpenSignup={openSignupModal} />
+        <Header
+          onOpenLogin={openLoginModal}
+          onOpenSignup={openSignupModal}
+          cart={cart}
+        />
 
         <div className="flex-grow">
           {successMessage && (
-            <div className="fixed top-5 right-5 bg-green-500 text-white px-4 py-2 rounded-lg shadow-md transition-opacity duration-300">
+            <div className="fixed bottom-5 right-5 bg-green-500 text-white px-4 py-2 rounded-lg shadow-md transition-opacity duration-300">
               {successMessage}
               <button
                 className="ml-4 text-lg font-bold"
@@ -117,11 +134,21 @@ function App() {
 
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/book-ticket" element={<BookTicketPage />} />
+            <Route
+              path="/book-ticket"
+              element={<BookTicketPage cart={cart} setCart={setCart} />}
+            />
+
             <Route
               path="/book-ticket/:id"
-              element={<EventDetailsForBooking />}
+              element={<EventDetailsForBooking cart={cart} setCart={setCart} />}
             />
+
+            <Route
+              path="/cart"
+              element={<CartPage cart={cart} setCart={setCart} />}
+            />
+
             <Route element={<PrivateRoute requiredRole="organizer" />}>
               <Route path="/events" element={<EventsPage />} />
               <Route path="/events/:id" element={<EventDetailsPage />} />

@@ -1,8 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaMapMarkerAlt, FaClock, FaRedo } from "react-icons/fa";
+import {
+  FaMapMarkerAlt,
+  FaClock,
+  FaRedo,
+  FaShoppingCart,
+} from "react-icons/fa";
 
-const BookTicketPage = ({ addToCart }) => {
+const BookTicketPage = ({ cart, setCart }) => {
   const [events, setEvents] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [priceRange, setPriceRange] = useState([0, 1000]);
@@ -20,6 +25,21 @@ const BookTicketPage = ({ addToCart }) => {
     const formattedHour = hour % 12 || 12;
     const ampm = hour >= 12 ? "PM" : "AM";
     return `${formattedHour}:${minute} ${ampm}`;
+  };
+
+  const handleAddToCart = (event) => {
+    setCart((prevCart) => {
+      const existingItem = prevCart.find((item) => item._id === event._id);
+      if (existingItem) {
+        return prevCart.map((item) =>
+          item._id === event._id
+            ? { ...item, quantity: Math.min(item.quantity + 1, 2) }
+            : item
+        );
+      } else {
+        return [...prevCart, { ...event, quantity: 1 }];
+      }
+    });
   };
 
   const filteredEvents = events.filter((event) => {
@@ -96,7 +116,7 @@ const BookTicketPage = ({ addToCart }) => {
           {filteredEvents.map((event) => (
             <div
               key={event._id}
-              className="bg-gray-100 shadow-md rounded-lg overflow-hidden border border-gray-300 p-5 flex flex-col justify-between h-[296px]"
+              className="bg-gray-100 shadow-md rounded-lg overflow-hidden border border-gray-300 p-5 flex flex-col justify-between h-[320px]"
             >
               <div>
                 <div className="flex justify-between items-start">
@@ -142,10 +162,10 @@ const BookTicketPage = ({ addToCart }) => {
                   View Details
                 </Link>
                 <button
-                  onClick={() => addToCart(event)}
-                  className="bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded-md w-1/2"
+                  onClick={() => handleAddToCart(event)}
+                  className="bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded-md w-1/2 flex items-center gap-2 justify-center"
                 >
-                  Add to Cart
+                  <FaShoppingCart /> Add to Cart
                 </button>
               </div>
             </div>
