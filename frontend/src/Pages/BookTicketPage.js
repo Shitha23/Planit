@@ -28,16 +28,28 @@ const BookTicketPage = ({ cart, setCart }) => {
   };
 
   const handleAddToCart = (event) => {
+    if (!event || !event.eventInstanceId) {
+      console.error("Missing eventInstanceId in event:", event);
+      return;
+    }
     setCart((prevCart) => {
-      const existingItem = prevCart.find((item) => item._id === event._id);
+      const existingItem = prevCart.find(
+        (item) =>
+          item._id === event._id &&
+          item.eventInstanceId === event.eventInstanceId
+      );
       if (existingItem) {
         return prevCart.map((item) =>
-          item._id === event._id
+          item._id === event._id &&
+          item.eventInstanceId === event.eventInstanceId
             ? { ...item, quantity: Math.min(item.quantity + 1, 2) }
             : item
         );
       } else {
-        return [...prevCart, { ...event, quantity: 1 }];
+        return [
+          ...prevCart,
+          { ...event, eventInstanceId: event.eventInstanceId, quantity: 1 },
+        ];
       }
     });
   };
