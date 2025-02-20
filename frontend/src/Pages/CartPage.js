@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaTrashAlt } from "react-icons/fa";
 
 const TAX_RATE = 0.13;
 
 const CartPage = ({ cart, setCart }) => {
   const [total, setTotal] = useState({ subtotal: 0, tax: 0, totalAmount: 0 });
+  const [alertMessage, setAlertMessage] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     calculateTotal();
@@ -33,8 +35,23 @@ const CartPage = ({ cart, setCart }) => {
     setCart(cart.filter((item) => item._id !== id));
   };
 
+  const handleCheckout = () => {
+    const uid = localStorage.getItem("userName");
+    if (!uid) {
+      setAlertMessage("You must log in before proceeding to checkout!");
+      return;
+    }
+    navigate("/checkout");
+  };
+
   return (
     <div className="container mx-auto p-6">
+      {alertMessage && (
+        <div className="bg-red-500 text-white text-center p-2 mb-4 rounded-md">
+          {alertMessage}
+        </div>
+      )}
+
       <h1 className="text-4xl font-extrabold text-navyBlue mb-8">Your Cart</h1>
 
       {cart.length === 0 ? (
@@ -114,7 +131,10 @@ const CartPage = ({ cart, setCart }) => {
                 <span>${total.totalAmount?.toFixed(2)}</span>
               </div>
             </div>
-            <button className="bg-navyBlue hover:bg-deepBlue text-white w-full mt-4 py-2 rounded-lg text-lg font-semibold">
+            <button
+              onClick={handleCheckout}
+              className="bg-navyBlue hover:bg-deepBlue text-white w-full mt-4 py-2 rounded-lg text-lg font-semibold"
+            >
               Proceed to Checkout
             </button>
           </div>

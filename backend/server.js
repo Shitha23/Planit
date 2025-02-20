@@ -1,9 +1,9 @@
 const express = require("express");
 const cors = require("cors");
-const User = require("./models/User");
 const event = require("./routes/event");
 const connectDB = require("./db");
 const auth = require("./routes/auth");
+const order = require("./routes/order");
 
 const app = express();
 
@@ -25,6 +25,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", auth);
 app.use("/api", event);
+app.use("/api", order);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import {
   FaMapMarkerAlt,
   FaClock,
@@ -10,7 +10,6 @@ import {
 
 const EventDetailsForBooking = ({ cart, setCart }) => {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [event, setEvent] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [alert, setAlert] = useState(null);
@@ -30,26 +29,33 @@ const EventDetailsForBooking = ({ cart, setCart }) => {
   };
 
   const handleAddToCart = () => {
-    if (!event) return;
+    if (!event || !event.eventInstanceId) return;
 
     let newCart = [...cart];
-    const existingItem = newCart.find((item) => item._id === event._id);
+    const existingItem = newCart.find(
+      (item) =>
+        item._id === event._id && item.eventInstanceId === event.eventInstanceId
+    );
 
     if (existingItem) {
       if (existingItem.quantity >= 2) {
         setAlert({
           type: "error",
-          message: "Max 2 tickets allowed per event!",
+          message: "Max 2 tickets allowed per event instance!",
         });
         return;
       }
       newCart = newCart.map((item) =>
-        item._id === event._id
+        item._id === event._id && item.eventInstanceId === event.eventInstanceId
           ? { ...item, quantity: Math.min(item.quantity + quantity, 2) }
           : item
       );
     } else {
-      newCart.push({ ...event, quantity });
+      newCart.push({
+        ...event,
+        eventInstanceId: event.eventInstanceId,
+        quantity,
+      });
     }
 
     setCart(newCart);

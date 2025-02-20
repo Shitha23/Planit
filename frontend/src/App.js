@@ -18,6 +18,8 @@ import CartPage from "./Pages/CartPage";
 import "./App.css";
 import BookTicketPage from "./Pages/BookTicketPage";
 import EventDetailsForBooking from "./Pages/EventDetailsForBooking";
+import CheckoutPage from "./Pages/CheckoutPage";
+import OrderSuccessPage from "./Pages/OrderSuccessPage";
 
 const PrivateRoute = ({ requiredRole }) => {
   const [user, setUser] = useState(null);
@@ -68,8 +70,6 @@ function App() {
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
-
-
 
   const openLoginModal = () => {
     setModalTitle("Log In");
@@ -138,6 +138,11 @@ function App() {
               path="/book-ticket"
               element={<BookTicketPage cart={cart} setCart={setCart} />}
             />
+            <Route
+              path="/checkout"
+              element={<CheckoutPage cart={cart} setCart={setCart} />}
+            />
+            <Route path="/order-success" element={<OrderSuccessPage />} />
 
             <Route
               path="/book-ticket/:id"

@@ -116,6 +116,7 @@ const AuthForm = ({ type, onClose, setSuccessMessage, setErrorMessage }) => {
 
         if (response.data && response.data.name) {
           localStorage.setItem("userName", response.data.name);
+          localStorage.setItem("firebaseId", response.data.firebaseId);
         }
 
         setSuccessMessage(`Login Successful! Welcome, ${response.data.name}`);
