@@ -72,6 +72,50 @@ router.post("/order", async (req, res) => {
   }
 });
 
+router.get("/orders", async (req, res) => {
+  try {
+    const orders = await Order.find().sort({ createdAt: -1 });
+
+    // Fetch users manually based on firebaseId
+    const userIds = orders.map((order) => order.userId);
+    const users = await User.find({ firebaseId: { $in: userIds } }).select(
+      "firebaseId name email"
+    );
+
+    // Fetch event instances and populate the related event title
+    const eventInstanceIds = orders.flatMap((order) =>
+      order.tickets.map((ticket) => ticket.eventInstanceId)
+    );
+    const eventInstances = await EventInstance.find({
+      _id: { $in: eventInstanceIds },
+    }).populate("eventId", "title");
+
+    // Map user and event details into orders
+    const enrichedOrders = orders.map((order) => ({
+      ...order.toObject(),
+      user: users.find((user) => user.firebaseId === order.userId) || {
+        name: "Unknown",
+        email: "Unknown",
+      },
+      tickets: order.tickets.map((ticket) => {
+        const eventInstance = eventInstances.find((instance) =>
+          instance._id.equals(ticket.eventInstanceId)
+        );
+        return {
+          ...ticket,
+          eventInstance: eventInstance
+            ? eventInstance.toObject()
+            : { title: "Unknown" },
+        };
+      }),
+    }));
+
+    res.json(enrichedOrders);
+  } catch (error) {
+    res.status(500).json({ error: error.message || "Error fetching orders." });
+  }
+});
+
 router.get("/user-ticket-count/:userId/:eventId", async (req, res) => {
   try {
     const { userId, eventId } = req.params;
