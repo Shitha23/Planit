@@ -17,6 +17,7 @@ import EventsPage from "./Pages/EventsPage";
 import CartPage from "./Pages/CartPage";
 import "./App.css";
 import BookTicketPage from "./Pages/BookTicketPage";
+import TicketAnalysisDashboard from "./Pages/TicketAnalysisDashboard";
 import EventDetailsForBooking from "./Pages/EventDetailsForBooking";
 import CheckoutPage from "./Pages/CheckoutPage";
 import OrderSuccessPage from "./Pages/OrderSuccessPage";
@@ -148,7 +149,10 @@ function App() {
               path="/book-ticket/:id"
               element={<EventDetailsForBooking cart={cart} setCart={setCart} />}
             />
-
+            <Route
+              path="/ticket-analysis"
+              element={<TicketAnalysisDashboard />}
+            />
             <Route
               path="/cart"
               element={<CartPage cart={cart} setCart={setCart} />}
