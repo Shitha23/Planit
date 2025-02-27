@@ -7,9 +7,11 @@ import {
   FaUsers,
   FaShoppingCart,
 } from "react-icons/fa";
+import EventQueryForm from "../Components/EventQueryForm";
 
 const EventDetailsForBooking = ({ cart, setCart }) => {
   const { id } = useParams();
+  const [ticketsSold, setTicketsSold] = useState(0);
   const [event, setEvent] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [alert, setAlert] = useState(null);
@@ -21,6 +23,15 @@ const EventDetailsForBooking = ({ cart, setCart }) => {
       .catch((err) => console.error("Error fetching event:", err));
   }, [id]);
 
+  useEffect(() => {
+    fetch(`http://localhost:5000/api/tickets-sold/${id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setTicketsSold(data.ticketsSold);
+      })
+      .catch((err) => console.error("Error fetching tickets sold:", err));
+  }, [id]);
+
   const formatTime = (time) => {
     const [hour, minute] = time.split(":");
     const formattedHour = hour % 12 || 12;
@@ -29,38 +40,49 @@ const EventDetailsForBooking = ({ cart, setCart }) => {
   };
 
   const handleAddToCart = () => {
-    if (!event || !event.eventInstanceId) return;
+    if (!event || !event.eventInstanceId) {
+      console.error("Missing eventInstanceId in event:", event);
 
-    let newCart = [...cart];
-    const existingItem = newCart.find(
-      (item) =>
-        item._id === event._id && item.eventInstanceId === event.eventInstanceId
-    );
-
-    if (existingItem) {
-      if (existingItem.quantity >= 2) {
-        setAlert({
-          type: "error",
-          message: "Max 2 tickets allowed per event instance!",
-        });
-        return;
-      }
-      newCart = newCart.map((item) =>
-        item._id === event._id && item.eventInstanceId === event.eventInstanceId
-          ? { ...item, quantity: Math.min(item.quantity + quantity, 2) }
-          : item
-      );
-    } else {
-      newCart.push({
-        ...event,
-        eventInstanceId: event.eventInstanceId,
-        quantity,
-      });
+      return;
     }
 
-    setCart(newCart);
-    setAlert({ type: "success", message: "Tickets added to cart!" });
-    setTimeout(() => setAlert(null), 3000);
+    setCart((prevCart) => {
+      let newCart = [...prevCart];
+
+      const existingItem = newCart.find(
+        (item) =>
+          item._id === event._id &&
+          item.eventInstanceId === event.eventInstanceId
+      );
+
+      if (existingItem) {
+        if (existingItem.quantity >= 2) {
+          setAlert({
+            type: "error",
+            message: "Max 2 tickets allowed per event instance!",
+          });
+          return prevCart;
+        }
+        newCart = newCart.map((item) =>
+          item._id === event._id &&
+          item.eventInstanceId === event.eventInstanceId
+            ? { ...item, quantity: Math.min(item.quantity + quantity, 2) }
+            : item
+        );
+      } else {
+        newCart.push({
+          ...event,
+          eventInstanceId: event.eventInstanceId,
+          quantity,
+        });
+      }
+
+      console.log("Updated Cart:", newCart);
+      setAlert({ type: "success", message: "Tickets added to cart!" });
+      setTimeout(() => setAlert(null), 3000);
+
+      return newCart;
+    });
   };
 
   if (!event) return <p className="text-gray-500 text-center">Loading...</p>;
@@ -120,7 +142,7 @@ const EventDetailsForBooking = ({ cart, setCart }) => {
           <div className="flex items-center gap-3 text-lg text-gray-800">
             <FaUsers className="text-gray-600" />
             <span>
-              {event.ticketsSold} / {event.maxAttendees} Attendees
+              {ticketsSold} / {event.maxAttendees} Attendees
             </span>
           </div>
 
@@ -162,6 +184,12 @@ const EventDetailsForBooking = ({ cart, setCart }) => {
           </button>
         </div>
       </div>
+
+      {localStorage.getItem("firebaseId") ? (
+        <EventQueryForm eventId={id} />
+      ) : (
+        ""
+      )}
     </div>
   );
 };
