@@ -20,7 +20,9 @@ import BookTicketPage from "./Pages/BookTicketPage";
 import TicketAnalysisDashboard from "./Pages/TicketAnalysisDashboard";
 import EventDetailsForBooking from "./Pages/EventDetailsForBooking";
 import CheckoutPage from "./Pages/CheckoutPage";
+import OrganizerQueriesPage from "./Pages/OrganizerQueriesPage";
 import OrderSuccessPage from "./Pages/OrderSuccessPage";
+import OrganizerQueryDetails from "./Pages/OrganizerQueryDetails";
 
 const PrivateRoute = ({ requiredRole }) => {
   const [user, setUser] = useState(null);
@@ -144,7 +146,14 @@ function App() {
               element={<CheckoutPage cart={cart} setCart={setCart} />}
             />
             <Route path="/order-success" element={<OrderSuccessPage />} />
-
+            <Route
+              path="/customer-queries"
+              element={<OrganizerQueriesPage />}
+            />
+            <Route
+              path="/organizer-queries/:eventId"
+              element={<OrganizerQueryDetails />}
+            />
             <Route
               path="/book-ticket/:id"
               element={<EventDetailsForBooking cart={cart} setCart={setCart} />}

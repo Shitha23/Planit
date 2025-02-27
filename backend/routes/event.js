@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Event = require("../models/Event");
 const EventInstance = require("../models/EventInstance");
+const Order = require("../models/Order");
 
 router.post("/event", async (req, res) => {
   try {
@@ -53,7 +54,7 @@ router.post("/event", async (req, res) => {
           instanceDate: new Date(currentDate),
           instanceTime: time,
           location,
-          ticketsSold: 0,
+          ticketsSold: event.ticketsSold,
         });
 
         if (recurrenceType === "daily") {
@@ -84,13 +85,24 @@ router.post("/event", async (req, res) => {
   }
 });
 
-router.get("/event/:id", async (req, res) => {
+router.get("/event/:eventId", async (req, res) => {
   try {
-    const event = await Event.findById(req.params.id);
+    const event = await Event.findById(req.params.eventId);
     if (!event) return res.status(404).json({ error: "Event not found" });
-    res.json(event);
+
+    const eventInstance = await EventInstance.findOne({ eventId: event._id });
+
+    res.json({
+      ...event.toObject(),
+      eventInstanceId: eventInstance ? eventInstance._id : null,
+      instanceDate: eventInstance ? eventInstance.instanceDate : null,
+      instanceTime: eventInstance ? eventInstance.instanceTime : null,
+      instanceLocation: eventInstance ? eventInstance.location : null,
+      instanceTicketsSold: eventInstance ? eventInstance.ticketsSold : 0,
+    });
   } catch (error) {
-    res.status(500).json({ error: "Error fetching event" });
+    console.error("Error fetching event:", error);
+    res.status(500).json({ error: "Error fetching event details" });
   }
 });
 
@@ -172,6 +184,44 @@ router.delete("/event/:id", async (req, res) => {
     res.json({ message: "Event and instances deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: "Error deleting event" });
+  }
+});
+
+router.get("/tickets-sold/:eventId", async (req, res) => {
+  try {
+    const { eventId } = req.params;
+
+    const eventInstances = await EventInstance.find({ eventId }).select("_id");
+
+    if (!eventInstances || eventInstances.length === 0) {
+      return res.json({ eventId, ticketsSold: 0, revenue: 0 });
+    }
+
+    const eventInstanceIds = eventInstances.map((instance) => instance._id);
+
+    const ticketsSoldData = await Order.aggregate([
+      { $unwind: "$tickets" },
+      { $match: { "tickets.eventInstanceId": { $in: eventInstanceIds } } },
+      {
+        $group: {
+          _id: null,
+          totalTicketsSold: { $sum: "$tickets.quantity" },
+          totalRevenue: { $sum: "$tickets.price" },
+        },
+      },
+    ]);
+
+    const ticketsSold =
+      ticketsSoldData.length > 0 ? ticketsSoldData[0].totalTicketsSold : 0;
+    const revenue =
+      ticketsSoldData.length > 0 ? ticketsSoldData[0].totalRevenue : 0;
+
+    res.json({ eventId, ticketsSold, revenue });
+  } catch (error) {
+    console.error("Error fetching ticket sales:", error);
+    res
+      .status(500)
+      .json({ error: error.message || "Error fetching ticket sales." });
   }
 });
 

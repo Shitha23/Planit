@@ -5,6 +5,7 @@ const connectDB = require("./db");
 const auth = require("./routes/auth");
 const order = require("./routes/order");
 const ticket = require("./routes/ticket-analysis");
+const eventQueries = require("./routes/eventqueries");
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use("/api/auth", auth);
 app.use("/api", event);
 app.use("/api", order);
 app.use("/api", ticket);
+app.use("/api", eventQueries);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

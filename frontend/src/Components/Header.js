@@ -3,8 +3,10 @@ import { Link } from "react-router-dom";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { FaShoppingCart, FaBars, FaTimes, FaSignOutAlt } from "react-icons/fa";
 import app from "../firebaseConfig";
+import { useNavigate } from "react-router-dom";
 
 const Header = ({ onOpenLogin, onOpenSignup, cart = [] }) => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [userName, setUserName] = useState(
     localStorage.getItem("userName") || ""
@@ -65,10 +67,11 @@ const Header = ({ onOpenLogin, onOpenSignup, cart = [] }) => {
     localStorage.removeItem("userName");
     localStorage.removeItem("userRole");
     setDropdownOpen(false);
+    navigate("/");
   };
 
   return (
-    <header className="bg-white shadow-lg p-4 w-full">
+    <header className="bg-white shadow-lg p-4 w-full relative z-50">
       <div className="container mx-auto flex justify-between items-center relative">
         <div className="flex items-center">
           <img
@@ -266,7 +269,7 @@ const Header = ({ onOpenLogin, onOpenSignup, cart = [] }) => {
                   </button>
 
                   {dropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-36 bg-white shadow-md rounded-md py-2 border border-gray-200">
+                    <div className="absolute right-0 mt-2 w-36 bg-white shadow-md rounded-md py-2 border border-gray-200 z-50">
                       <button
                         onClick={handleLogout}
                         className="flex items-center px-4 py-2 text-red-600 hover:bg-gray-100 w-full"
