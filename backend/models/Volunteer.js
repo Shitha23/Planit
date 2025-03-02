@@ -17,4 +17,8 @@ const volunteerSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
+volunteerSchema.statics.getVolunteerCount = async function (eventId) {
+  return await this.countDocuments({ eventId });
+};
+
 module.exports = mongoose.model("Volunteer", volunteerSchema);

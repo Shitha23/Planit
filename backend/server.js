@@ -6,6 +6,7 @@ const auth = require("./routes/auth");
 const order = require("./routes/order");
 const ticket = require("./routes/ticket-analysis");
 const eventQueries = require("./routes/eventqueries");
+const volunteer = require("./routes/volunteer");
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", auth);
 app.use("/api", event);
 app.use("/api", order);
+app.use("/api", volunteer);
 app.use("/api", ticket);
 app.use("/api", eventQueries);
 
