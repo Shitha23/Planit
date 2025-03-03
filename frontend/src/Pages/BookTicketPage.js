@@ -12,6 +12,7 @@ const BookTicketPage = ({ cart, setCart }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [onlyRecurring, setOnlyRecurring] = useState(false);
+  const [alert, setAlert] = useState(null);
 
   useEffect(() => {
     fetch("http://localhost:5000/api/ticketevents")
@@ -32,25 +33,41 @@ const BookTicketPage = ({ cart, setCart }) => {
       console.error("Missing eventInstanceId in event:", event);
       return;
     }
+
     setCart((prevCart) => {
-      const existingItem = prevCart.find(
+      let newCart = [...prevCart];
+      const existingItem = newCart.find(
         (item) =>
           item._id === event._id &&
           item.eventInstanceId === event.eventInstanceId
       );
+
       if (existingItem) {
-        return prevCart.map((item) =>
+        if (existingItem.quantity >= 2) {
+          setAlert({
+            type: "error",
+            message: "A user can only book 2 tickets per event!",
+          });
+          return prevCart;
+        }
+        newCart = newCart.map((item) =>
           item._id === event._id &&
           item.eventInstanceId === event.eventInstanceId
             ? { ...item, quantity: Math.min(item.quantity + 1, 2) }
             : item
         );
       } else {
-        return [
-          ...prevCart,
-          { ...event, eventInstanceId: event.eventInstanceId, quantity: 1 },
-        ];
+        newCart.push({
+          ...event,
+          eventInstanceId: event.eventInstanceId,
+          quantity: 1,
+        });
       }
+
+      setAlert({ type: "success", message: "Tickets added to cart!" });
+      setTimeout(() => setAlert(null), 3000);
+
+      return newCart;
     });
   };
 
@@ -74,6 +91,18 @@ const BookTicketPage = ({ cart, setCart }) => {
 
   return (
     <div className="container mx-auto p-6">
+      {alert && (
+        <div
+          className={`fixed bottom-5 right-5 px-4 py-2 rounded-md shadow-md ${
+            alert.type === "success"
+              ? "bg-green-500 text-white"
+              : "bg-red-500 text-white"
+          }`}
+        >
+          {alert.message}
+        </div>
+      )}
+
       <h1 className="text-4xl font-extrabold text-navyBlue mb-8">
         Book Your Ticket
       </h1>

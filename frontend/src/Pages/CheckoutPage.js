@@ -80,7 +80,7 @@ const CheckoutPage = ({ cart, setCart }) => {
           price: item.ticketPrice,
         })),
         totalAmount: totalPrice,
-        paymentStatus: "Pending",
+        paymentStatus: "Completed",
         orderStatus: "Confirmed",
       };
 

@@ -15,7 +15,6 @@ const orderSchema = new mongoose.Schema({
       },
       ticketId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Ticket",
         required: true,
       },
       quantity: { type: Number, required: true },
