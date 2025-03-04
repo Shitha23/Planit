@@ -1,9 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const Order = require("../models/Order");
-const Ticket = require("../models/Ticket");
-const Event = require("../models/Event");
-const User = require("../models/User");
 const router = express.Router();
 
 router.get("/sales-summary", async (req, res) => {
@@ -39,9 +36,21 @@ router.get("/sales-summary", async (req, res) => {
 router.get("/event-sales/:eventId", async (req, res) => {
   try {
     const { eventId } = req.params;
-    const ticketsSold = await Ticket.find({
-      eventInstanceId: eventId,
-    }).countDocuments();
+    const ticketsSold = await Order.aggregate([
+      { $unwind: "$tickets" },
+      {
+        $match: {
+          "tickets.eventInstanceId": new mongoose.Types.ObjectId(eventId),
+        },
+      },
+      {
+        $group: { _id: null, totalTicketsSold: { $sum: "$tickets.quantity" } },
+      },
+    ]);
+
+    const totalTicketsSold =
+      ticketsSold.length > 0 ? ticketsSold[0].totalTicketsSold : 0;
+
     const totalRevenue = await Order.aggregate([
       { $unwind: "$tickets" },
       {
@@ -51,7 +60,7 @@ router.get("/event-sales/:eventId", async (req, res) => {
     ]);
     res.json({
       eventId,
-      ticketsSold,
+      totalTicketsSold,
       totalRevenue: totalRevenue[0]?.revenue || 0,
     });
   } catch (error) {

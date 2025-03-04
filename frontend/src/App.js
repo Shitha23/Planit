@@ -24,6 +24,7 @@ import OrganizerQueriesPage from "./Pages/OrganizerQueriesPage";
 import OrderSuccessPage from "./Pages/OrderSuccessPage";
 import OrganizerQueryDetails from "./Pages/OrganizerQueryDetails";
 import VolunteerPage from "./Pages/VolunteerPage";
+import SponsorshipPage from "./Pages/SponsorshipPage";
 
 const PrivateRoute = ({ requiredRole }) => {
   const [user, setUser] = useState(null);
@@ -156,6 +157,7 @@ function App() {
               path="/organizer-queries/:eventId"
               element={<OrganizerQueryDetails />}
             />
+            <Route path="/sponsor-event" element={<SponsorshipPage />} />
             <Route
               path="/book-ticket/:id"
               element={<EventDetailsForBooking cart={cart} setCart={setCart} />}
