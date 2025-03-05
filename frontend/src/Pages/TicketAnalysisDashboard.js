@@ -100,11 +100,17 @@ const TicketAnalysisDashboard = () => {
                       {order.user?.name || "Unknown"}
                     </td>
                     <td className="border p-2">
-                      {order.tickets[0]?.eventInstance?.eventId?.title ||
-                        "Unknown"}
+                      {order.tickets[0]?.eventInstance?.title || "Unknown"}
                     </td>
-                    <td className="border p-2">{order.tickets.length}</td>
-                    <td className="border p-2">${order.totalAmount}</td>
+                    <td className="border p-2">
+                      {order.tickets.reduce(
+                        (acc, ticket) => acc + ticket.quantity,
+                        0
+                      )}
+                    </td>
+                    <td className="border p-2">
+                      ${order.totalAmount.toFixed(2)}
+                    </td>
                     <td className="border p-2">
                       {new Date(order.createdAt).toLocaleDateString()}
                     </td>

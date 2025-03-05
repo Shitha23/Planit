@@ -79,43 +79,56 @@ router.get("/orders", async (req, res) => {
       return res.status(400).json({ error: "Organizer ID is required." });
     }
 
-    const events = await Event.find({ organizerId }).select("_id");
-    if (!events.length) {
-      return res.json([]);
-    }
+    const events = await Event.find({ organizerId }).select("_id title").lean();
+    if (!events.length) return res.json([]);
+
+    const eventIds = events.map((event) => event._id.toString());
 
     const eventInstances = await EventInstance.find({
-      eventId: { $in: events.map((e) => e._id) },
-    }).select("_id eventId");
-    if (!eventInstances.length) {
-      return res.json([]);
-    }
+      eventId: { $in: eventIds },
+    })
+      .select("_id eventId")
+      .lean();
 
-    const eventInstanceIds = eventInstances.map((instance) => instance._id);
+    if (!eventInstances.length) return res.json([]);
+
+    const eventInstanceMap = {};
+    eventInstances.forEach((instance) => {
+      eventInstanceMap[instance._id.toString()] = instance.eventId.toString();
+    });
+
+    const eventMap = {};
+    events.forEach((event) => {
+      eventMap[event._id.toString()] = event.title;
+    });
+
     const orders = await Order.find({
-      "tickets.eventInstanceId": { $in: eventInstanceIds },
-    }).sort({ createdAt: -1 });
+      "tickets.eventInstanceId": { $in: Object.keys(eventInstanceMap) },
+    })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    if (!orders.length) return res.json([]);
 
     const userIds = orders.map((order) => order.userId);
-    const users = await User.find({ firebaseId: { $in: userIds } }).select(
-      "firebaseId name email"
-    );
+    const users = await User.find({ firebaseId: { $in: userIds } })
+      .select("firebaseId name email")
+      .lean();
 
     const enrichedOrders = orders.map((order) => ({
-      ...order.toObject(),
+      ...order,
       user: users.find((user) => user.firebaseId === order.userId) || {
         name: "Unknown",
         email: "Unknown",
       },
       tickets: order.tickets.map((ticket) => {
-        const eventInstance = eventInstances.find((instance) =>
-          instance._id.equals(ticket.eventInstanceId)
-        );
+        const eventId = eventInstanceMap[ticket.eventInstanceId.toString()];
         return {
           ...ticket,
-          eventInstance: eventInstance
-            ? eventInstance.toObject()
-            : { title: "Unknown" },
+          eventInstance: {
+            eventId,
+            title: eventMap[eventId] || "Unknown",
+          },
         };
       }),
     }));

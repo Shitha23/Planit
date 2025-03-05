@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 
 const EventDetailsPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [event, setEvent] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({});
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     fetch(`http://localhost:5000/api/event/${id}`)
@@ -27,6 +29,26 @@ const EventDetailsPage = () => {
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({ ...formData, [name]: type === "checkbox" ? checked : value });
+  };
+
+  const handleDelete = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/event/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(errorData.error || "Failed to delete event");
+        return;
+      }
+
+      setShowDeleteModal(false);
+      navigate("/events");
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      alert("Error deleting event.");
+    }
   };
 
   const handleUpdate = async () => {
@@ -62,6 +84,7 @@ const EventDetailsPage = () => {
       </nav>
 
       <h2 className="text-2xl font-bold text-navyBlue mb-4">Event Details</h2>
+
       {editMode ? (
         <div className="bg-white p-6 shadow-lg rounded-xl border border-blueGray">
           <label className="block text-gray-700">Title:</label>
@@ -142,25 +165,46 @@ const EventDetailsPage = () => {
             <p>
               <strong>Location:</strong> {event.location}
             </p>
-            <p>
-              <strong>Needs Sponsorship:</strong>{" "}
-              {event.needSponsorship
-                ? `Yes ($${event.sponsorshipAmount})`
-                : "No"}
-            </p>
-            <p>
-              <strong>Needs Volunteers:</strong>{" "}
-              {event.needVolunteers
-                ? `Yes (${event.volunteersRequired})`
-                : "No"}
-            </p>
           </div>
+          <button
+            onClick={() => setShowDeleteModal(true)}
+            className="mt-4 bg-red-600 text-white px-4 py-2 rounded-xl hover:bg-red-700 transition mr-2"
+          >
+            Delete Event
+          </button>
           <button
             onClick={() => setEditMode(true)}
             className="mt-4 bg-mediumBlue text-white px-4 py-2 rounded-xl"
           >
             Edit Event
           </button>
+        </div>
+      )}
+
+      {showDeleteModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-xl font-semibold text-gray-800">
+              Confirm Delete
+            </h2>
+            <p className="text-gray-600 mt-2">
+              Are you sure you want to delete this event?
+            </p>
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg mr-2"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
