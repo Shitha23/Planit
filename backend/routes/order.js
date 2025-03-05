@@ -74,19 +74,32 @@ router.post("/order", async (req, res) => {
 
 router.get("/orders", async (req, res) => {
   try {
-    const orders = await Order.find().sort({ createdAt: -1 });
+    const { organizerId } = req.query;
+    if (!organizerId) {
+      return res.status(400).json({ error: "Organizer ID is required." });
+    }
+
+    const events = await Event.find({ organizerId }).select("_id");
+    if (!events.length) {
+      return res.json([]);
+    }
+
+    const eventInstances = await EventInstance.find({
+      eventId: { $in: events.map((e) => e._id) },
+    }).select("_id eventId");
+    if (!eventInstances.length) {
+      return res.json([]);
+    }
+
+    const eventInstanceIds = eventInstances.map((instance) => instance._id);
+    const orders = await Order.find({
+      "tickets.eventInstanceId": { $in: eventInstanceIds },
+    }).sort({ createdAt: -1 });
 
     const userIds = orders.map((order) => order.userId);
     const users = await User.find({ firebaseId: { $in: userIds } }).select(
       "firebaseId name email"
     );
-
-    const eventInstanceIds = orders.flatMap((order) =>
-      order.tickets.map((ticket) => ticket.eventInstanceId)
-    );
-    const eventInstances = await EventInstance.find({
-      _id: { $in: eventInstanceIds },
-    }).populate("eventId", "title");
 
     const enrichedOrders = orders.map((order) => ({
       ...order.toObject(),

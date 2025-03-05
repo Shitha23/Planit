@@ -171,7 +171,7 @@ const EventsPage = () => {
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-navyBlue">
+        <h2 className="text-4xl font-extrabold text-navyBlue mb-8">
           My Organized Events
         </h2>
         <button
