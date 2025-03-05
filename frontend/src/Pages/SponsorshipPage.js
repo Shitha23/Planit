@@ -33,7 +33,7 @@ const SponsorshipPage = () => {
               <p className="text-gray-800 font-medium mt-2">
                 Sponsorship Needed: ${event.sponsorshipAmount}
               </p>
-              <button className="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+              <button className="mt-4  bg-navyBlue hover:bg-deepBlue text-white py-2 px-4 rounded ">
                 Sponsor Event
               </button>
             </div>
