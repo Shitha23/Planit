@@ -76,13 +76,11 @@ router.get("/orders", async (req, res) => {
   try {
     const orders = await Order.find().sort({ createdAt: -1 });
 
-    // Fetch users manually based on firebaseId
     const userIds = orders.map((order) => order.userId);
     const users = await User.find({ firebaseId: { $in: userIds } }).select(
       "firebaseId name email"
     );
 
-    // Fetch event instances and populate the related event title
     const eventInstanceIds = orders.flatMap((order) =>
       order.tickets.map((ticket) => ticket.eventInstanceId)
     );
@@ -90,7 +88,6 @@ router.get("/orders", async (req, res) => {
       _id: { $in: eventInstanceIds },
     }).populate("eventId", "title");
 
-    // Map user and event details into orders
     const enrichedOrders = orders.map((order) => ({
       ...order.toObject(),
       user: users.find((user) => user.firebaseId === order.userId) || {

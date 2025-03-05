@@ -26,7 +26,7 @@ const VolunteerPage = ({ userId }) => {
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
-      <h2 className="text-2xl font-extrabold text-blue-700 mb-6 text-center">
+      <h2 className="text-4xl font-extrabold text-navyBlue mb-8">
         Volunteer Dashboard
       </h2>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

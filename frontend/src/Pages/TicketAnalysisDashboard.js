@@ -14,19 +14,28 @@ const TicketAnalysisDashboard = () => {
   }, []);
 
   const fetchSalesSummary = async () => {
-    const response = await fetch("http://localhost:5000/api/sales-summary");
+    const organizerId = localStorage.getItem("firebaseId");
+    const response = await fetch(
+      `http://localhost:5000/api/sales-summary?organizerId=${organizerId}`
+    );
     const data = await response.json();
     setSalesSummary(data);
   };
 
   const fetchOrders = async () => {
-    const response = await fetch("http://localhost:5000/api/orders");
+    const organizerId = localStorage.getItem("firebaseId");
+    const response = await fetch(
+      `http://localhost:5000/api/orders?organizerId=${organizerId}`
+    );
     const data = await response.json();
     setOrders(data);
   };
 
   const fetchSalesTimeline = async () => {
-    const response = await fetch("http://localhost:5000/api/timeline");
+    const organizerId = localStorage.getItem("firebaseId");
+    const response = await fetch(
+      `http://localhost:5000/api/timeline?organizerId=${organizerId}`
+    );
     const data = await response.json();
     setSalesTimeline(data);
   };
