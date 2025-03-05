@@ -60,7 +60,7 @@ const VolunteerPage = ({ userId }) => {
                 Volunteer slots are full
               </p>
             ) : (
-              <button className="mt-4 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-md">
+              <button className="mt-4 px-5 py-2 bg-navyBlue hover:bg-deepBlue text-white font-medium rounded-lg shadow-md">
                 Register as Volunteer
               </button>
             )}
