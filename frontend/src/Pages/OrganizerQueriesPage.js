@@ -60,7 +60,8 @@ const OrganizerQueriesPage = () => {
                   <strong>Queries:</strong> {event.queryCount}
                 </p>
                 <button
-                  className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+                  type="button"
+                  className="mt-3 w-full bg-navyBlue text-white text-center py-2 rounded-xl hover:bg-deepBlue transition duration-300 ease-in-out shadow-md"
                   onClick={() => navigate(`/organizer-queries/${event._id}`)}
                 >
                   View Queries
