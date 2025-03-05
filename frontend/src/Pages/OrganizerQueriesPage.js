@@ -39,7 +39,7 @@ const OrganizerQueriesPage = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
+      <h2 className="text-4xl font-extrabold text-navyBlue mb-8">
         Event Queries
       </h2>
 
