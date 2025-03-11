@@ -99,6 +99,9 @@ const AuthForm = ({ type, onClose, setSuccessMessage, setErrorMessage }) => {
           firebaseId,
         });
 
+        localStorage.setItem("userName", formData.name);
+        window.dispatchEvent(new Event("userLoggedIn"));
+
         setSuccessMessage("Signup Successful! Please log in.");
         await signOut(auth);
         onClose();
@@ -134,6 +137,7 @@ const AuthForm = ({ type, onClose, setSuccessMessage, setErrorMessage }) => {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
       const { uid, displayName, email } = user;
+
       let existingUser = await axios
         .get(`http://localhost:5000/api/auth/user/${uid}`)
         .catch(() => ({}));
@@ -144,14 +148,18 @@ const AuthForm = ({ type, onClose, setSuccessMessage, setErrorMessage }) => {
           name: displayName || "Google User",
           email,
         });
-        existingUser = { data: { name: displayName || "Google User" } };
+        existingUser = {
+          data: { name: displayName || "Google User", firebaseId: uid },
+        };
       }
 
       localStorage.setItem("userName", existingUser.data.name);
+      localStorage.setItem("firebaseId", existingUser.data.firebaseId);
+
+      window.dispatchEvent(new Event("userLoggedIn"));
 
       setSuccessMessage(`Login Successful! Welcome, ${existingUser.data.name}`);
       onClose();
-      window.dispatchEvent(new Event("userLoggedIn"));
     } catch (error) {
       setErrorMessage("Google Sign-In Failed: " + error.message);
       onClose();

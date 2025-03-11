@@ -7,6 +7,7 @@ const order = require("./routes/order");
 const ticket = require("./routes/ticket-analysis");
 const eventQueries = require("./routes/eventqueries");
 const volunteer = require("./routes/volunteer");
+const userRoutes = require("./routes/userRoutes");
 const sponsorship = require("./routes/sponsorship");
 
 const app = express();
@@ -34,6 +35,7 @@ app.use("/api", volunteer);
 app.use("/api", ticket);
 app.use("/api", eventQueries);
 app.use("/api", sponsorship);
+app.use("/api/users", userRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

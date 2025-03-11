@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
-import { FaShoppingCart, FaBars, FaTimes, FaSignOutAlt } from "react-icons/fa";
+import {
+  FaShoppingCart,
+  FaBars,
+  FaTimes,
+  FaSignOutAlt,
+  FaUser,
+} from "react-icons/fa";
 import app from "../firebaseConfig";
 import { useNavigate } from "react-router-dom";
 
@@ -22,15 +28,16 @@ const Header = ({ onOpenLogin, onOpenSignup, cart = [] }) => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
-        setUserName(localStorage.getItem("userName") || "User");
+
+        const storedName =
+          localStorage.getItem("userName") || currentUser.displayName || "User";
+        setUserName(storedName);
 
         try {
           const response = await fetch(
             `http://localhost:5000/api/auth/user/${currentUser.uid}`
           );
-          if (!response.ok) {
-            throw new Error("Failed to fetch role");
-          }
+          if (!response.ok) throw new Error("Failed to fetch role");
           const data = await response.json();
           setUserRole(data.role);
           localStorage.setItem("userRole", data.role);
@@ -46,13 +53,17 @@ const Header = ({ onOpenLogin, onOpenSignup, cart = [] }) => {
       }
     });
 
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
     const updateUserFromEvent = () => {
       setUserName(localStorage.getItem("userName") || "User");
     };
+
     window.addEventListener("userLoggedIn", updateUserFromEvent);
 
     return () => {
-      unsubscribe();
       window.removeEventListener("userLoggedIn", updateUserFromEvent);
     };
   }, []);
@@ -164,7 +175,13 @@ const Header = ({ onOpenLogin, onOpenSignup, cart = [] }) => {
               </button>
 
               {dropdownOpen && (
-                <div className="absolute right-0 mt-2 w-36 bg-white shadow-md rounded-md py-2 border border-gray-200">
+                <div className="absolute right-0 mt-2 w-40 bg-white shadow-md rounded-md py-2 border border-gray-200">
+                  <Link
+                    to="/account"
+                    className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 w-full"
+                  >
+                    <FaUser className="mr-2" /> Account
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className="flex items-center px-4 py-2 text-red-600 hover:bg-gray-100 w-full"
@@ -269,7 +286,13 @@ const Header = ({ onOpenLogin, onOpenSignup, cart = [] }) => {
                   </button>
 
                   {dropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-36 bg-white shadow-md rounded-md py-2 border border-gray-200 z-50">
+                    <div className="absolute right-0 mt-2 w-40 bg-white shadow-md rounded-md py-2 border border-gray-200">
+                      <Link
+                        to="/account"
+                        className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 w-full"
+                      >
+                        <FaUser className="mr-2" /> Account
+                      </Link>
                       <button
                         onClick={handleLogout}
                         className="flex items-center px-4 py-2 text-red-600 hover:bg-gray-100 w-full"
