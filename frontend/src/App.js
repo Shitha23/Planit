@@ -25,6 +25,7 @@ import OrderSuccessPage from "./Pages/OrderSuccessPage";
 import OrganizerQueryDetails from "./Pages/OrganizerQueryDetails";
 import VolunteerPage from "./Pages/VolunteerPage";
 import SponsorshipPage from "./Pages/SponsorshipPage";
+import AccountPage from "./Pages/AccountPage";
 
 const PrivateRoute = ({ requiredRole }) => {
   const [user, setUser] = useState(null);
@@ -143,6 +144,7 @@ function App() {
               path="/book-ticket"
               element={<BookTicketPage cart={cart} setCart={setCart} />}
             />
+            <Route path="/account" element={<AccountPage />} />
             <Route
               path="/checkout"
               element={<CheckoutPage cart={cart} setCart={setCart} />}

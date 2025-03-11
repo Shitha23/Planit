@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const Order = require("../models/Order");
 const Event = require("../models/Event");
+const EventInstance = require("../models/EventInstance");
 
 const router = express.Router();
 
@@ -21,12 +22,9 @@ router.get("/sales-summary", async (req, res) => {
       });
     }
 
-    const eventInstances = await mongoose
-      .model("EventInstance")
-      .find({
-        eventId: { $in: events.map((event) => event._id) },
-      })
-      .select("_id");
+    const eventInstances = await EventInstance.find({
+      eventId: { $in: events.map((event) => event._id) },
+    }).select("_id");
 
     if (!eventInstances.length) {
       return res.json({
@@ -48,26 +46,37 @@ router.get("/sales-summary", async (req, res) => {
       totalTicketsResult.length > 0 ? totalTicketsResult[0].totalTickets : 0;
 
     const totalRevenueResult = await Order.aggregate([
+      { $unwind: "$tickets" },
       {
         $match: {
           paymentStatus: "Completed",
           "tickets.eventInstanceId": { $in: eventInstanceIds },
         },
       },
-      { $group: { _id: null, revenue: { $sum: "$totalAmount" } } },
+      {
+        $group: {
+          _id: null,
+          revenue: {
+            $sum: { $multiply: ["$tickets.price", "$tickets.quantity"] },
+          },
+        },
+      },
     ]);
 
     const totalRevenue =
       totalRevenueResult.length > 0 ? totalRevenueResult[0].revenue : 0;
 
     const paymentStatusCount = await Order.aggregate([
+      { $unwind: "$tickets" },
       { $match: { "tickets.eventInstanceId": { $in: eventInstanceIds } } },
       { $group: { _id: "$paymentStatus", count: { $sum: 1 } } },
     ]);
 
     res.json({ totalTickets, totalRevenue, paymentStatusCount });
   } catch (error) {
-    res.status(500).json({ error: "Error fetching sales summary." });
+    res
+      .status(500)
+      .json({ error: error.message || "Error fetching sales summary." });
   }
 });
 
@@ -133,18 +142,16 @@ router.get("/timeline", async (req, res) => {
     const events = await Event.find({ organizerId }).select("_id");
     if (!events.length) return res.json([]);
 
-    const eventInstances = await mongoose
-      .model("EventInstance")
-      .find({
-        eventId: { $in: events.map((event) => event._id) },
-      })
-      .select("_id");
+    const eventInstances = await EventInstance.find({
+      eventId: { $in: events.map((event) => event._id) },
+    }).select("_id");
 
     if (!eventInstances.length) return res.json([]);
 
     const eventInstanceIds = eventInstances.map((instance) => instance._id);
 
     const salesData = await Order.aggregate([
+      { $unwind: "$tickets" },
       {
         $match: {
           paymentStatus: "Completed",
@@ -154,8 +161,10 @@ router.get("/timeline", async (req, res) => {
       {
         $group: {
           _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-          totalSales: { $sum: "$totalAmount" },
-          ticketsSold: { $sum: { $size: "$tickets" } },
+          totalSales: {
+            $sum: { $multiply: ["$tickets.price", "$tickets.quantity"] },
+          },
+          ticketsSold: { $sum: "$tickets.quantity" },
         },
       },
       { $sort: { _id: 1 } },
@@ -163,7 +172,9 @@ router.get("/timeline", async (req, res) => {
 
     res.json(salesData);
   } catch (error) {
-    res.status(500).json({ error: "Error fetching sales timeline." });
+    res
+      .status(500)
+      .json({ error: error.message || "Error fetching sales timeline." });
   }
 });
 

@@ -53,7 +53,7 @@ router.post("/order", async (req, res) => {
       userId: user.firebaseId,
       tickets,
       totalAmount,
-      paymentStatus: "Pending",
+      paymentStatus: "Completed",
       orderStatus: "Confirmed",
     });
 
