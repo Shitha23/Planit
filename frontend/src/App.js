@@ -10,6 +10,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Header from "./Components/Header";
 import Footer from "./Components/Footer";
 import Modal from "./Components/Modal";
+import AdminPage from "./Pages/AdminPage";
 import AuthForm from "./Components/AuthForm";
 import EventDetailsPage from "./Pages/EventDetailsPage";
 import Home from "./Pages/Home";
@@ -173,6 +174,9 @@ function App() {
               element={<CartPage cart={cart} setCart={setCart} />}
             />
 
+            <Route element={<PrivateRoute requiredRole="admin" />}>
+              <Route path="/admin" element={<AdminPage />} />
+            </Route>
             <Route element={<PrivateRoute requiredRole="organizer" />}>
               <Route path="/events" element={<EventsPage />} />
               <Route path="/events/:id" element={<EventDetailsPage />} />
