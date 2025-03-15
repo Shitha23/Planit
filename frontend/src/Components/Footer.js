@@ -4,6 +4,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 const Footer = ({ onOpenLogin, onOpenSignup }) => {
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState("");
+  const [alert, setAlert] = useState({ message: "", type: "" });
 
   useEffect(() => {
     const auth = getAuth();
@@ -14,14 +15,50 @@ const Footer = ({ onOpenLogin, onOpenSignup }) => {
     return () => unsubscribe();
   }, []);
 
-  const handleSubscribe = (e) => {
+  const handleSubscribe = async (e) => {
     e.preventDefault();
-    alert(`Thank you for subscribing, ${email}!`);
-    setEmail("");
+
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/newsletter/subscribe",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        }
+      );
+
+      const data = await response.json();
+      if (response.ok) {
+        setAlert({ message: data.message, type: "success" });
+        setEmail("");
+      } else {
+        setAlert({ message: data.error, type: "error" });
+      }
+    } catch (error) {
+      setAlert({
+        message: "Failed to subscribe. Please try again.",
+        type: "error",
+      });
+    }
+
+    setTimeout(() => setAlert({ message: "", type: "" }), 4000);
   };
 
   return (
     <footer className="bg-navyBlue text-white py-8 mt-10">
+      {alert.message && (
+        <div
+          className={`fixed top-5 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-lg shadow-lg w-[90%] max-w-md text-center ${
+            alert.type === "success"
+              ? "bg-green-100 text-green-800 border border-green-400"
+              : "bg-red-100 text-red-800 border border-red-400"
+          }`}
+        >
+          {alert.message}
+        </div>
+      )}
+
       <div className="container mx-auto flex flex-col md:flex-row justify-between items-center">
         <div className="flex items-center mb-6 md:mb-0">
           <img
