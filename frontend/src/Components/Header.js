@@ -148,6 +148,11 @@ const Header = ({ onOpenLogin, onOpenSignup, cart = [] }) => {
               </Link>
             </>
           )}
+          {userRole === "admin" && (
+            <Link to="/admin" className="text-mediumBlue hover:text-deepBlue">
+              Users
+            </Link>
+          )}
         </nav>
 
         <div className="hidden md:flex items-center space-x-4">
