@@ -142,6 +142,22 @@ router.get("/ticketevents", async (req, res) => {
   }
 });
 
+router.get("/upcoming", async (req, res) => {
+  try {
+    const today = new Date();
+    const nextWeek = new Date();
+    nextWeek.setDate(today.getDate() + 7);
+
+    const upcomingEvents = await Event.find({
+      date: { $gte: today, $lte: nextWeek },
+    }).sort({ date: 1 });
+
+    res.json(upcomingEvents);
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching upcoming events" });
+  }
+});
+
 router.put("/event/:id", async (req, res) => {
   try {
     const updatedEvent = await Event.findByIdAndUpdate(

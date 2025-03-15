@@ -1,3 +1,5 @@
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, "./.env") });
 const express = require("express");
 const cors = require("cors");
 const event = require("./routes/event");
@@ -10,6 +12,9 @@ const volunteer = require("./routes/volunteer");
 const userRoutes = require("./routes/userRoutes");
 const sponsorship = require("./routes/sponsorship");
 const adminRoutes = require("./routes/admin");
+const organizerRequestRoutes = require("./routes/organizerRequest");
+const reviewRoutes = require("./routes/review");
+const newsletterRoutes = require("./routes/newsletter");
 
 const app = express();
 
@@ -34,9 +39,12 @@ app.use("/api", event);
 app.use("/api", order);
 app.use("/api", volunteer);
 app.use("/api", ticket);
+app.use("/api/reviews", reviewRoutes);
 app.use("/api", eventQueries);
 app.use("/api", sponsorship);
 app.use("/api/users", userRoutes);
+app.use("/api/newsletter", newsletterRoutes);
+app.use("/api/organizer-request", organizerRequestRoutes);
 app.use("/api/admin", adminRoutes);
 
 const PORT = process.env.PORT || 5000;
