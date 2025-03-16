@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FaTicketAlt, FaUsers, FaHandshake } from "react-icons/fa";
 import axios from "axios";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import ReviewSection from "../Components/ReviewSection";
 
 const Home = () => {
@@ -12,8 +13,16 @@ const Home = () => {
     reason: "",
   });
   const [alert, setAlert] = useState({ message: "", type: "" });
-
+  const [user, setUser] = useState(null);
   const [events, setEvents] = useState([]);
+
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const fetchUpcomingEvents = async () => {
@@ -47,17 +56,20 @@ const Home = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
+        if (!user) return;
         const firebaseId = localStorage.getItem("firebaseId");
+        if (!firebaseId) return;
+
         const response = await axios.get(
           `http://localhost:5000/api/auth/user/${firebaseId}`
         );
         if (response.data) {
-          setFormData((prev) => ({
-            ...prev,
+          setFormData({
             name: response.data.name || "",
             email: response.data.email || "",
             phone: response.data.phone || "",
-          }));
+            reason: "",
+          });
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -65,7 +77,7 @@ const Home = () => {
     };
 
     fetchUserData();
-  }, []);
+  }, [user, showModal]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -302,24 +314,28 @@ const Home = () => {
       </section>
 
       {/* Call-to-Action Section */}
-      <section className="py-16 px-6 md:px-20 bg-navyBlue text-white text-center">
-        <h2 className="text-3xl font-bold">Ready to Create Your Own Event?</h2>
-        <p className="mt-4 text-lg">
-          Join us today and start planning, managing, and promoting events with
-          ease.
-        </p>
-        <button
-          className="mt-6 bg-lightBlue text-deepBlue px-6 py-3 rounded-lg text-lg hover:bg-deepBlue hover:text-white"
-          onClick={() => setShowModal(true)}
-        >
-          Get Started
-        </button>
-      </section>
+      {user && (
+        <section className="py-16 px-6 md:px-20 bg-navyBlue text-white text-center">
+          <h2 className="text-3xl font-bold">
+            Ready to Create Your Own Event?
+          </h2>
+          <p className="mt-4 text-lg">
+            Join us today and start planning, managing, and promoting events
+            with ease.
+          </p>
+          <button
+            className="mt-6 bg-lightBlue text-deepBlue px-6 py-3 rounded-lg text-lg hover:bg-deepBlue hover:text-white"
+            onClick={() => setShowModal(true)}
+          >
+            Get Started
+          </button>
+        </section>
+      )}
 
-      <ReviewSection />
+      {user && <ReviewSection />}
 
       {/* Organizer Request Modal */}
-      {showModal && (
+      {user && showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-96">
             <h2 className="text-xl font-bold mb-4">Request Organizer Role</h2>
