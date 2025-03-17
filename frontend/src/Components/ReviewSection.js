@@ -26,10 +26,6 @@ const ReviewSection = () => {
     const auth = getAuth();
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        setFormData((prev) => ({
-          ...prev,
-          name: user.displayName || "Anonymous",
-        }));
         setIsAuthenticated(true);
       } else {
         setIsAuthenticated(false);
@@ -52,13 +48,19 @@ const ReviewSection = () => {
       return;
     }
 
+    const reviewData = {
+      name: formData.name || "Anonymous",
+      rating: formData.rating,
+      review: formData.review,
+    };
+
     try {
       const response = await axios.post(
         "http://localhost:5000/api/reviews",
-        formData
+        reviewData
       );
       setReviews([...reviews, response.data]);
-      setFormData({ ...formData, rating: 0, review: "" });
+      setFormData({ ...formData, name: "", rating: 0, review: "" });
       setAlert({ message: "Review submitted successfully!", type: "success" });
       setTimeout(() => setAlert({ message: "", type: "" }), 3000);
     } catch (error) {
@@ -105,7 +107,7 @@ const ReviewSection = () => {
             type="text"
             placeholder="Your Name"
             value={formData.name}
-            readOnly
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             className="w-full p-2 border rounded mb-4 bg-gray-100"
           />
 

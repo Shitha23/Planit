@@ -96,7 +96,7 @@ const AdminPage = () => {
         <p className="text-mediumBlue text-center text-lg">Loading users...</p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse bg-white shadow-md rounded-xl overflow-hidden">
+          <table className="w-full border-collapse bg-white shadow-md rounded-xl overflow-hidden text-sm md:text-base">
             <thead>
               <tr className="bg-deepBlue text-white">
                 <th className="p-3 text-left">Email</th>
@@ -108,15 +108,15 @@ const AdminPage = () => {
               {users.length > 0 ? (
                 users.map((user) => (
                   <tr key={user.email} className="border-b hover:bg-blueGray">
-                    <td className="p-3">{user.email}</td>
+                    <td className="p-3 break-words max-w-xs">{user.email}</td>
                     <td className="p-3">{user.role}</td>
-                    <td className="p-3 flex gap-2 items-center">
+                    <td className="p-3 flex flex-col md:flex-row gap-2 items-center">
                       <select
                         value={selectedRoles[user.email]}
                         onChange={(e) =>
                           handleRoleChange(user.email, e.target.value)
                         }
-                        className="p-2 border border-blueGray rounded-md focus:outline-none focus:ring-2 focus:ring-mediumBlue"
+                        className="p-2 border border-blueGray rounded-md focus:outline-none focus:ring-2 focus:ring-mediumBlue w-full md:w-auto"
                         disabled={
                           user.email === currentUserEmail ||
                           (user.role === "organizer" && user.hasEvents)
@@ -128,7 +128,7 @@ const AdminPage = () => {
                       </select>
                       <button
                         onClick={() => updateRole(user.email)}
-                        className="px-4 py-2 bg-mediumBlue text-white rounded-lg hover:bg-deepBlue transition"
+                        className="px-4 py-2 bg-mediumBlue text-white rounded-lg hover:bg-deepBlue transition w-full md:w-auto"
                         disabled={
                           user.email === currentUserEmail ||
                           (user.role === "organizer" && user.hasEvents)

@@ -4,6 +4,7 @@ import {
   Routes,
   Route,
   Navigate,
+  useNavigate,
   Outlet,
 } from "react-router-dom";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -27,38 +28,21 @@ import OrganizerQueryDetails from "./Pages/OrganizerQueryDetails";
 import VolunteerPage from "./Pages/VolunteerPage";
 import SponsorshipPage from "./Pages/SponsorshipPage";
 import AccountPage from "./Pages/AccountPage";
+import AdminOrganizerRequests from "./Pages/AdminOrganizerRequests";
 
-const PrivateRoute = ({ requiredRole }) => {
-  const [user, setUser] = useState(null);
-  const [userRole, setUserRole] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-        try {
-          const response = await fetch(
-            `http://localhost:5000/api/auth/user/${currentUser.uid}`
-          );
-          const data = await response.json();
-          setUserRole(data.role);
-        } catch (error) {
-          console.error("Error fetching user role:", error);
-        }
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  if (loading) return <p className="text-center text-gray-500">Loading...</p>;
-  if (!user || userRole !== requiredRole) return <Navigate to="/" />;
+const PrivateRoute = ({ requiredRole, userRole }) => {
+  if (!userRole || userRole !== requiredRole) {
+    return <Navigate to="/" />;
+  }
   return <Outlet />;
+};
+
+const AppWrapper = () => {
+  return (
+    <Router>
+      <App />
+    </Router>
+  );
 };
 
 function App() {
@@ -66,8 +50,58 @@ function App() {
   const [modalTitle, setModalTitle] = useState("");
   const [authType, setAuthType] = useState("");
   const [cart, setCart] = useState([]);
+  const [user, setUser] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [userRole, setUserRole] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+        const storedRole = localStorage.getItem("userRole");
+
+        if (storedRole) {
+          setUserRole(storedRole);
+        } else {
+          try {
+            const response = await fetch(
+              `http://localhost:5000/api/auth/user/${currentUser.uid}`
+            );
+            const data = await response.json();
+            setUserRole(data.role);
+            localStorage.setItem("userRole", data.role);
+          } catch (error) {
+            console.error("Error fetching user role:", error);
+            setUserRole("customer");
+          }
+        }
+      } else {
+        setUser(null);
+        setUserRole(null);
+        localStorage.clear();
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [navigate]);
+
+  useEffect(() => {
+    if (!loading && userRole) {
+      if (userRole === "organizer" && window.location.pathname !== "/events") {
+        navigate("/events");
+      } else if (
+        userRole === "admin" &&
+        window.location.pathname !== "/admin"
+      ) {
+        navigate("/admin");
+      }
+    }
+  }, [userRole, loading]);
 
   useEffect(() => {
     const savedCart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -96,98 +130,111 @@ function App() {
     setModalTitle("");
   };
 
+  if (loading) return <p className="text-center text-gray-500">Loading...</p>;
+
   return (
-    <Router>
-      <div className="App flex flex-col min-h-screen">
-        <Header
-          onOpenLogin={openLoginModal}
-          onOpenSignup={openSignupModal}
-          cart={cart}
-        />
+    <div className="App flex flex-col min-h-screen">
+      <Header
+        onOpenLogin={openLoginModal}
+        onOpenSignup={openSignupModal}
+        cart={cart}
+      />
 
-        <div className="flex-grow">
-          {successMessage && (
-            <div className="fixed bottom-5 right-5 bg-green-500 text-white px-4 py-2 rounded-lg shadow-md transition-opacity duration-300">
-              {successMessage}
-              <button
-                className="ml-4 text-lg font-bold"
-                onClick={() => setSuccessMessage("")}
-              >
-                ✖
-              </button>
-            </div>
-          )}
+      <div className="flex-grow">
+        {successMessage && (
+          <div className="fixed bottom-5 right-5 bg-green-500 text-white px-4 py-2 rounded-lg shadow-md transition-opacity duration-300  z-[9999]">
+            {successMessage}
+            <button
+              className="ml-4 text-lg font-bold"
+              onClick={() => setSuccessMessage("")}
+            >
+              ✖
+            </button>
+          </div>
+        )}
 
-          {errorMessage && (
-            <div className="fixed top-5 right-5 bg-red-500 text-white px-4 py-2 rounded-lg shadow-md transition-opacity duration-300">
-              {errorMessage}
-              <button
-                className="ml-4 text-lg font-bold"
-                onClick={() => setErrorMessage("")}
-              >
-                ✖
-              </button>
-            </div>
-          )}
+        {errorMessage && (
+          <div className="fixed bottom-5 right-5 bg-red-500 text-white px-4 py-2 rounded-lg shadow-md transition-opacity duration-300  z-[9999]">
+            {errorMessage}
+            <button
+              className="ml-4 text-lg font-bold"
+              onClick={() => setErrorMessage("")}
+            >
+              ✖
+            </button>
+          </div>
+        )}
 
-          <Modal isOpen={isModalOpen} onClose={closeModal} Title={modalTitle}>
-            <AuthForm
-              type={authType}
-              onClose={closeModal}
-              setSuccessMessage={setSuccessMessage}
-              setErrorMessage={setErrorMessage}
-            />
-          </Modal>
+        <Modal isOpen={isModalOpen} onClose={closeModal} Title={modalTitle}>
+          <AuthForm
+            type={authType}
+            onClose={closeModal}
+            setSuccessMessage={setSuccessMessage}
+            setErrorMessage={setErrorMessage}
+          />
+        </Modal>
 
-          <Routes>
-            <Route path="/" element={<Home />} />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route
+            path="/book-ticket"
+            element={<BookTicketPage cart={cart} setCart={setCart} />}
+          />
+          <Route path="/account" element={<AccountPage />} />
+          <Route
+            path="/checkout"
+            element={<CheckoutPage cart={cart} setCart={setCart} />}
+          />
+          <Route path="/order-success" element={<OrderSuccessPage />} />
+          <Route path="/volunteer-event" element={<VolunteerPage />} />
+
+          <Route path="/sponsor-event" element={<SponsorshipPage />} />
+          <Route
+            path="/book-ticket/:id"
+            element={<EventDetailsForBooking cart={cart} setCart={setCart} />}
+          />
+
+          <Route
+            path="/cart"
+            element={<CartPage cart={cart} setCart={setCart} />}
+          />
+
+          <Route
+            element={<PrivateRoute requiredRole="admin" userRole={userRole} />}
+          >
+            <Route path="/admin" element={<AdminPage />} />
             <Route
-              path="/book-ticket"
-              element={<BookTicketPage cart={cart} setCart={setCart} />}
+              path="/admin/organizer-requests"
+              element={<AdminOrganizerRequests />}
             />
-            <Route path="/account" element={<AccountPage />} />
-            <Route
-              path="/checkout"
-              element={<CheckoutPage cart={cart} setCart={setCart} />}
-            />
-            <Route path="/order-success" element={<OrderSuccessPage />} />
-            <Route path="/volunteer-event" element={<VolunteerPage />} />
-            <Route
-              path="/customer-queries"
-              element={<OrganizerQueriesPage />}
-            />
-            <Route
-              path="/organizer-queries/:eventId"
-              element={<OrganizerQueryDetails />}
-            />
-            <Route path="/sponsor-event" element={<SponsorshipPage />} />
-            <Route
-              path="/book-ticket/:id"
-              element={<EventDetailsForBooking cart={cart} setCart={setCart} />}
-            />
+          </Route>
+
+          <Route
+            element={
+              <PrivateRoute requiredRole="organizer" userRole={userRole} />
+            }
+          >
+            <Route path="/events" element={<EventsPage />} />
+            <Route path="/events/:id" element={<EventDetailsPage />} />
             <Route
               path="/ticket-analysis"
               element={<TicketAnalysisDashboard />}
             />
             <Route
-              path="/cart"
-              element={<CartPage cart={cart} setCart={setCart} />}
+              path="/organizer-queries/:eventId"
+              element={<OrganizerQueryDetails />}
             />
-
-            <Route element={<PrivateRoute requiredRole="admin" />}>
-              <Route path="/admin" element={<AdminPage />} />
-            </Route>
-            <Route element={<PrivateRoute requiredRole="organizer" />}>
-              <Route path="/events" element={<EventsPage />} />
-              <Route path="/events/:id" element={<EventDetailsPage />} />
-            </Route>
-          </Routes>
-        </div>
-
-        <Footer onOpenLogin={openLoginModal} onOpenSignup={openSignupModal} />
+            <Route
+              path="/customer-queries"
+              element={<OrganizerQueriesPage />}
+            />
+          </Route>
+        </Routes>
       </div>
-    </Router>
+
+      <Footer onOpenLogin={openLoginModal} onOpenSignup={openSignupModal} />
+    </div>
   );
 }
 
-export default App;
+export default AppWrapper;

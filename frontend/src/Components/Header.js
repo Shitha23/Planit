@@ -33,23 +33,29 @@ const Header = ({ onOpenLogin, onOpenSignup, cart = [] }) => {
           localStorage.getItem("userName") || currentUser.displayName || "User";
         setUserName(storedName);
 
-        try {
-          const response = await fetch(
-            `http://localhost:5000/api/auth/user/${currentUser.uid}`
-          );
-          if (!response.ok) throw new Error("Failed to fetch role");
-          const data = await response.json();
-          setUserRole(data.role);
-          localStorage.setItem("userRole", data.role);
-        } catch (error) {
-          console.error("Error fetching user role:", error);
-          setUserRole("customer");
+        const storedRole = localStorage.getItem("userRole");
+
+        if (storedRole) {
+          setUserRole(storedRole);
+        } else {
+          try {
+            const response = await fetch(
+              `http://localhost:5000/api/auth/user/${currentUser.uid}`
+            );
+            if (!response.ok) throw new Error("Failed to fetch role");
+            const data = await response.json();
+            setUserRole(data.role);
+            localStorage.setItem("userRole", data.role);
+          } catch (error) {
+            console.error("Error fetching user role:", error);
+            setUserRole("customer");
+          }
         }
       } else {
         setUser(null);
         setUserName("");
         setUserRole("customer");
-        localStorage.removeItem("userRole");
+        localStorage.clear();
       }
     });
 
@@ -58,7 +64,10 @@ const Header = ({ onOpenLogin, onOpenSignup, cart = [] }) => {
 
   useEffect(() => {
     const updateUserFromEvent = () => {
-      setUserName(localStorage.getItem("userName") || "User");
+      const storedUserName = localStorage.getItem("userName") || "User";
+      setUserName((prevUserName) =>
+        prevUserName !== storedUserName ? storedUserName : prevUserName
+      );
     };
 
     window.addEventListener("userLoggedIn", updateUserFromEvent);
@@ -71,41 +80,42 @@ const Header = ({ onOpenLogin, onOpenSignup, cart = [] }) => {
   const handleLogout = async () => {
     const auth = getAuth(app);
     await signOut(auth);
+
     setUser(null);
     setUserName("");
     setUserRole("customer");
+
     localStorage.removeItem("firebaseId");
     localStorage.removeItem("userName");
     localStorage.removeItem("userRole");
+
+    if (window.location.pathname !== "/") {
+      navigate("/", { replace: true });
+    }
+
     setDropdownOpen(false);
-    navigate("/");
   };
 
   return (
-    <header className="bg-white shadow-lg p-4 w-full relative z-50">
-      <div className="container mx-auto flex justify-between items-center relative">
-        <div className="flex items-center">
+    <header className="bg-white shadow-md">
+      <div className="container mx-auto flex justify-between items-center py-4 px-6">
+        {/* Logo */}
+        <Link to="/" className="text-2xl font-bold text-mediumBlue">
           <img
             src="/Images/logo-header.png"
-            alt="Company Logo"
-            className="h-10 rounded-full mr-2"
+            alt="Plan It"
+            className="h-10 mb-1  "
           />
-          <span className="text-navyBlue font-bold text-lg">Plan It</span>
-        </div>
+          <div className="mt-1">Plan It</div>
+        </Link>
 
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          className="md:hidden text-mediumBlue text-2xl"
-        >
-          {menuOpen ? <FaTimes /> : <FaBars />}
-        </button>
-
+        {/* Desktop Navigation */}
         <nav className="hidden md:flex space-x-6 text-sm sm:text-md">
-          <Link to="/" className="text-mediumBlue hover:text-deepBlue">
-            Home
-          </Link>
           {userRole === "customer" && (
             <>
+              <Link to="/" className="text-mediumBlue hover:text-deepBlue">
+                Home
+              </Link>
               <Link
                 to="/book-ticket"
                 className="text-mediumBlue hover:text-deepBlue"
@@ -149,12 +159,21 @@ const Header = ({ onOpenLogin, onOpenSignup, cart = [] }) => {
             </>
           )}
           {userRole === "admin" && (
-            <Link to="/admin" className="text-mediumBlue hover:text-deepBlue">
-              Users
-            </Link>
+            <>
+              <Link to="/admin" className="text-mediumBlue hover:text-deepBlue">
+                Users
+              </Link>
+              <Link
+                to="/admin/organizer-requests"
+                className="text-mediumBlue hover:text-deepBlue"
+              >
+                Organizer Requests
+              </Link>
+            </>
           )}
         </nav>
 
+        {/* Desktop Icons */}
         <div className="hidden md:flex items-center space-x-4">
           {userRole === "customer" && (
             <Link
@@ -176,11 +195,11 @@ const Header = ({ onOpenLogin, onOpenSignup, cart = [] }) => {
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 className="flex items-center px-4 py-2 text-black font-medium border border-red-500 rounded-full hover:bg-red-100"
               >
-                Hi, {userName}
+                Hi, {user.displayName || "User"}
               </button>
 
               {dropdownOpen && (
-                <div className="absolute right-0 mt-2 w-40 bg-white shadow-md rounded-md py-2 border border-gray-200">
+                <div className="absolute right-0 mt-2 w-40 bg-white shadow-md rounded-md py-2 border border-gray-200 z-[9999]">
                   <Link
                     to="/account"
                     className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 w-full"
@@ -214,119 +233,140 @@ const Header = ({ onOpenLogin, onOpenSignup, cart = [] }) => {
           )}
         </div>
 
-        {menuOpen && (
-          <div className="absolute top-16 left-0 w-full bg-white shadow-md flex flex-col items-center p-4 md:hidden z-50 space-y-4">
-            <nav className="flex flex-col space-y-4 text-sm sm:text-md items-center">
-              <Link to="/" className="text-mediumBlue hover:text-deepBlue">
-                Home
-              </Link>
-              {userRole === "customer" && (
-                <>
-                  <Link
-                    to="/book-ticket"
-                    className="text-mediumBlue hover:text-deepBlue"
-                  >
-                    Book Ticket
-                  </Link>
-                  <Link
-                    to="/volunteer-event"
-                    className="text-mediumBlue hover:text-deepBlue"
-                  >
-                    Volunteer an Event
-                  </Link>
-                  <Link
-                    to="/sponsor-event"
-                    className="text-mediumBlue hover:text-deepBlue"
-                  >
-                    Sponsor an Event
-                  </Link>
-                </>
-              )}
-              {userRole === "organizer" && (
-                <>
-                  <Link
-                    to="/events"
-                    className="text-mediumBlue hover:text-deepBlue"
-                  >
-                    Organize Event
-                  </Link>
-                  <Link
-                    to="/ticket-analysis"
-                    className="text-mediumBlue hover:text-deepBlue"
-                  >
-                    Ticket Analysis
-                  </Link>
-                  <Link
-                    to="/customer-queries"
-                    className="text-mediumBlue hover:text-deepBlue"
-                  >
-                    Customer Queries
-                  </Link>
-                </>
-              )}
-            </nav>
-
-            <div className="flex flex-col items-center space-y-4">
-              {userRole === "customer" && (
-                <Link
-                  to="/cart"
-                  className="relative flex items-center text-mediumBlue hover:text-deepBlue"
-                >
-                  <FaShoppingCart className="text-xl" />
-                  {Array.isArray(cart) && cart.length > 0 && (
-                    <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
-                      {cart.reduce((acc, item) => acc + item.quantity, 0)}
-                    </span>
-                  )}
-                </Link>
-              )}
-
-              {user ? (
-                <div className="relative">
-                  <button
-                    onClick={() => setDropdownOpen(!dropdownOpen)}
-                    className="flex items-center px-4 py-2 text-black font-medium border border-red-500 rounded-full hover:bg-red-100"
-                  >
-                    Hi, {userName}
-                  </button>
-
-                  {dropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-40 bg-white shadow-md rounded-md py-2 border border-gray-200">
-                      <Link
-                        to="/account"
-                        className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 w-full"
-                      >
-                        <FaUser className="mr-2" /> Account
-                      </Link>
-                      <button
-                        onClick={handleLogout}
-                        className="flex items-center px-4 py-2 text-red-600 hover:bg-gray-100 w-full"
-                      >
-                        <FaSignOutAlt className="mr-2" /> Logout
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="flex flex-col space-y-2">
-                  <button
-                    onClick={onOpenLogin}
-                    className="bg-mediumBlue text-white py-2 px-4 rounded-lg hover:bg-deepBlue"
-                  >
-                    Login
-                  </button>
-                  <button
-                    onClick={onOpenSignup}
-                    className="bg-navyBlue text-white py-2 px-4 rounded-lg hover:bg-deepBlue"
-                  >
-                    Signup
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+        {/* Mobile Menu Button */}
+        <button
+          className="md:hidden text-mediumBlue focus:outline-none"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          {menuOpen ? (
+            <FaTimes className="text-2xl" />
+          ) : (
+            <FaBars className="text-2xl" />
+          )}
+        </button>
       </div>
+
+      {/* Mobile Navigation */}
+      {menuOpen && (
+        <div className="absolute top-16 left-0 w-full bg-white shadow-md flex flex-col items-center p-4 md:hidden z-50 space-y-4">
+          <nav className="flex flex-col space-y-4 text-sm sm:text-md items-center">
+            {userRole === "customer" && (
+              <>
+                <Link to="/" className="text-mediumBlue hover:text-deepBlue">
+                  Home
+                </Link>
+                <Link
+                  to="/book-ticket"
+                  className="text-mediumBlue hover:text-deepBlue"
+                >
+                  Book Ticket
+                </Link>
+                <Link
+                  to="/volunteer-event"
+                  className="text-mediumBlue hover:text-deepBlue"
+                >
+                  Volunteer an Event
+                </Link>
+                <Link
+                  to="/sponsor-event"
+                  className="text-mediumBlue hover:text-deepBlue"
+                >
+                  Sponsor an Event
+                </Link>
+              </>
+            )}
+            {userRole === "organizer" && (
+              <>
+                <Link
+                  to="/events"
+                  className="text-mediumBlue hover:text-deepBlue"
+                >
+                  Organize Event
+                </Link>
+                <Link
+                  to="/ticket-analysis"
+                  className="text-mediumBlue hover:text-deepBlue"
+                >
+                  Ticket Analysis
+                </Link>
+                <Link
+                  to="/customer-queries"
+                  className="text-mediumBlue hover:text-deepBlue"
+                >
+                  Customer Queries
+                </Link>
+              </>
+            )}
+            {userRole === "admin" && (
+              <>
+                <Link
+                  to="/admin"
+                  className="text-mediumBlue hover:text-deepBlue"
+                >
+                  Users
+                </Link>
+                <Link
+                  to="/admin/organizer-requests"
+                  className="text-mediumBlue hover:text-deepBlue"
+                >
+                  Organizer Requests
+                </Link>
+              </>
+            )}
+          </nav>
+
+          {/* Mobile Account Links */}
+          <div className="flex flex-col items-center space-y-4">
+            {userRole === "customer" && (
+              <Link
+                to="/cart"
+                className="relative flex items-center text-mediumBlue hover:text-deepBlue"
+              >
+                <FaShoppingCart className="text-xl" />
+                {Array.isArray(cart) && cart.length > 0 && (
+                  <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                    {cart.reduce((acc, item) => acc + item.quantity, 0)}
+                  </span>
+                )}
+              </Link>
+            )}
+
+            {user ? (
+              <div className="relative">
+                <button
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex items-center px-4 py-2 text-black font-medium border border-red-500 rounded-full hover:bg-red-100"
+                >
+                  Hi, {user.displayName || "User"}
+                </button>
+                {dropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-40 bg-white shadow-md rounded-md py-2 border border-gray-200">
+                    <Link
+                      to="/account"
+                      className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 w-full"
+                    >
+                      <FaUser className="mr-2" /> Account
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center px-4 py-2 text-red-600 hover:bg-gray-100 w-full"
+                    >
+                      <FaSignOutAlt className="mr-2" /> Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={onOpenLogin}
+                className="bg-mediumBlue text-white py-2 px-4 rounded-lg hover:bg-deepBlue"
+              >
+                Login
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </header>
   );
 };
