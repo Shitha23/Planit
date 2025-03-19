@@ -18,6 +18,7 @@
   "description": "",
   "dependencies": {
     "concurrently": "^9.1.2",
+    "nodemailer": "^6.10.0",
     "nodemon": "^3.1.9"
   }
 }

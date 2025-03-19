@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import NotificationIcon from "./NotificationIcon";
 import { Link } from "react-router-dom";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import {
@@ -13,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 
 const Header = ({ onOpenLogin, onOpenSignup, cart = [] }) => {
   const navigate = useNavigate();
+  const [mongoUserId, setMongoUserId] = useState(null);
   const [user, setUser] = useState(null);
   const [userName, setUserName] = useState(
     localStorage.getItem("userName") || ""
@@ -51,6 +53,7 @@ const Header = ({ onOpenLogin, onOpenSignup, cart = [] }) => {
             setUserRole("customer");
           }
         }
+        fetchMongoUserId(currentUser.uid);
       } else {
         setUser(null);
         setUserName("");
@@ -61,6 +64,20 @@ const Header = ({ onOpenLogin, onOpenSignup, cart = [] }) => {
 
     return () => unsubscribe();
   }, []);
+
+  const fetchMongoUserId = async (firebaseUid) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/users/mongo-id/${firebaseUid}`
+      );
+      if (!response.ok) throw new Error("Failed to fetch MongoDB user ID");
+      const data = await response.json();
+      setMongoUserId(data.mongoId);
+    } catch (error) {
+      console.error("Error fetching MongoDB User ID:", error);
+      setMongoUserId(null);
+    }
+  };
 
   useEffect(() => {
     const updateUserFromEvent = () => {
@@ -357,15 +374,26 @@ const Header = ({ onOpenLogin, onOpenSignup, cart = [] }) => {
                 )}
               </div>
             ) : (
-              <button
-                onClick={onOpenLogin}
-                className="bg-mediumBlue text-white py-2 px-4 rounded-lg hover:bg-deepBlue"
-              >
-                Login
-              </button>
+              <>
+                <button
+                  onClick={onOpenLogin}
+                  className="bg-mediumBlue text-white py-2 px-4 rounded-lg hover:bg-deepBlue"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={onOpenSignup}
+                  className="bg-navyBlue text-white py-2 px-4 rounded-lg hover:bg-deepBlue"
+                >
+                  Signup
+                </button>
+              </>
             )}
           </div>
         </div>
+      )}
+      {user && userRole === "customer" && mongoUserId && (
+        <NotificationIcon userId={mongoUserId} />
       )}
     </header>
   );
