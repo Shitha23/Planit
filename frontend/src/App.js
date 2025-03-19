@@ -12,6 +12,7 @@ import Header from "./Components/Header";
 import Footer from "./Components/Footer";
 import Modal from "./Components/Modal";
 import AdminPage from "./Pages/AdminPage";
+import NotificationIcon from "./Components/NotificationIcon";
 import AuthForm from "./Components/AuthForm";
 import EventDetailsPage from "./Pages/EventDetailsPage";
 import Home from "./Pages/Home";
@@ -231,7 +232,6 @@ function App() {
           </Route>
         </Routes>
       </div>
-
       <Footer onOpenLogin={openLoginModal} onOpenSignup={openSignupModal} />
     </div>
   );

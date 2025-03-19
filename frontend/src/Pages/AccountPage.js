@@ -144,7 +144,7 @@ const AccountPage = () => {
   if (loading) return <p>Loading...</p>;
 
   return (
-    <div className="max-w-lg mx-auto p-6 bg-white shadow-lg rounded-lg">
+    <div className="max-w-lg mx-auto p-6 bg-white shadow-lg rounded-lg mt-3">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold">Account Page Details</h2>
         <span

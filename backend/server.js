@@ -15,6 +15,7 @@ const adminRoutes = require("./routes/admin");
 const organizerRequestRoutes = require("./routes/organizerRequest");
 const reviewRoutes = require("./routes/review");
 const newsletterRoutes = require("./routes/newsletter");
+const notificationRoutes = require("./routes/notifications");
 
 const app = express();
 
@@ -46,6 +47,6 @@ app.use("/api/users", userRoutes);
 app.use("/api/newsletter", newsletterRoutes);
 app.use("/api/organizer-request", organizerRequestRoutes);
 app.use("/api/admin", adminRoutes);
-
+app.use("/api/notifications", notificationRoutes);
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

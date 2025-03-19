@@ -12,6 +12,21 @@ router.get("/:firebaseId", async (req, res) => {
   }
 });
 
+router.get("/mongo-id/:firebaseId", async (req, res) => {
+  try {
+    const user = await User.findOne({ firebaseId: req.params.firebaseId });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({ mongoId: user._id });
+  } catch (error) {
+    console.error("Error fetching MongoDB user ID:", error);
+    res.status(500).json({ error: "Error fetching user ID" });
+  }
+});
+
 router.put("/:firebaseId", async (req, res) => {
   try {
     const { name, phone, address } = req.body;
