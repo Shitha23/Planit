@@ -30,6 +30,7 @@ import VolunteerPage from "./Pages/VolunteerPage";
 import SponsorshipPage from "./Pages/SponsorshipPage";
 import AccountPage from "./Pages/AccountPage";
 import AdminOrganizerRequests from "./Pages/AdminOrganizerRequests";
+import VolunteerReviewPage from "./Pages/VolunteerReviewPage";
 
 const PrivateRoute = ({ requiredRole, userRole }) => {
   if (!userRole || userRole !== requiredRole) {
@@ -187,7 +188,10 @@ function App() {
             element={<CheckoutPage cart={cart} setCart={setCart} />}
           />
           <Route path="/order-success" element={<OrderSuccessPage />} />
-          <Route path="/volunteer-event" element={<VolunteerPage />} />
+          <Route
+            path="/volunteer-event"
+            element={<VolunteerPage userId={user?.uid} />}
+          />
 
           <Route path="/sponsor-event" element={<SponsorshipPage />} />
           <Route
@@ -216,6 +220,10 @@ function App() {
             }
           >
             <Route path="/events" element={<EventsPage />} />
+            <Route
+              path="/volunteer-review"
+              element={<VolunteerReviewPage organizerId={user?.uid} />}
+            />
             <Route path="/events/:id" element={<EventDetailsPage />} />
             <Route
               path="/ticket-analysis"
