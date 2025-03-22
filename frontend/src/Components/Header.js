@@ -173,6 +173,12 @@ const Header = ({ onOpenLogin, onOpenSignup, cart = [] }) => {
               >
                 Customer Queries
               </Link>
+              <Link
+                to="/volunteer-review"
+                className="text-mediumBlue hover:text-deepBlue"
+              >
+                Volunteer Review
+              </Link>
             </>
           )}
           {userRole === "admin" && (
@@ -311,6 +317,12 @@ const Header = ({ onOpenLogin, onOpenSignup, cart = [] }) => {
                   className="text-mediumBlue hover:text-deepBlue"
                 >
                   Customer Queries
+                </Link>
+                <Link
+                  to="/volunteer-review"
+                  className="text-mediumBlue hover:text-deepBlue"
+                >
+                  Volunteer Review
                 </Link>
               </>
             )}
