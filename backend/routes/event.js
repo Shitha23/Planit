@@ -281,4 +281,14 @@ router.get("/ticketevents", async (req, res) => {
   }
 });
 
+router.get("/organizer/:organizerId", async (req, res) => {
+  try {
+    const events = await Event.find({ organizerId: req.params.organizerId });
+    res.json(events);
+  } catch (err) {
+    console.error("Error fetching organizer's events:", err);
+    res.status(500).json({ error: "Failed to fetch events" });
+  }
+});
+
 module.exports = router;

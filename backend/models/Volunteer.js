@@ -13,6 +13,7 @@ const volunteerSchema = new mongoose.Schema({
     enum: ["Basic", "Coordinator"],
     default: "Basic",
   },
+  reasonForCoordinator: String,
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
