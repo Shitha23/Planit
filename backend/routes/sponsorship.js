@@ -12,6 +12,21 @@ router.get("/events/needsponsorship", async (req, res) => {
   }
 });
 
+router.get("/sponsorships/:sponsorId", async (req, res) => {
+  try {
+    const { sponsorId } = req.params;
+
+    const sponsorships = await Sponsorship.find({ sponsorId })
+      .populate("eventId", "title date time location")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.json(sponsorships);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching sponsorships", error });
+  }
+});
+
 router.post("/sponsorships", async (req, res) => {
   try {
     const { eventId, sponsorId, amount } = req.body;

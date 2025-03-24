@@ -24,7 +24,9 @@ router.get("/events/need-volunteers", async (req, res) => {
 
 router.get("/volunteers/user/:userId", async (req, res) => {
   try {
-    const volunteers = await Volunteer.find({ volunteerId: req.params.userId });
+    const volunteers = await Volunteer.find({
+      volunteerId: req.params.userId,
+    }).populate("eventId");
     res.json(volunteers);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch volunteer data" });
