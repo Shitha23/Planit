@@ -6,6 +6,7 @@ import {
   EmailAuthProvider,
   reauthenticateWithCredential,
 } from "firebase/auth";
+import { FaFileInvoice } from "react-icons/fa";
 import app from "../firebaseConfig";
 
 const getFriendlyErrorMessage = (errorCode) => {
@@ -22,7 +23,6 @@ const getFriendlyErrorMessage = (errorCode) => {
     "auth/too-many-requests":
       "Too many failed attempts. Please try again later.",
   };
-
   return (
     errorMessages[errorCode] ||
     "An unexpected error occurred. Please try again."
@@ -48,16 +48,24 @@ const AccountPage = () => {
   const [passwordMessage, setPasswordMessage] = useState("");
   const [user, setUser] = useState(null);
 
+  const [activeTab, setActiveTab] = useState("Orders");
+  const [filterType, setFilterType] = useState("upcoming");
+  const [orders, setOrders] = useState([]);
+  const [sponsorships, setSponsorships] = useState([]);
+  const [volunteerEvents, setVolunteerEvents] = useState([]);
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
         fetchUserData(currentUser.uid);
+        fetchOrders(currentUser.uid);
+        fetchSponsorships(currentUser.uid);
+        fetchVolunteerEvents(currentUser.uid);
       } else {
         setLoading(false);
       }
     });
-
     return () => unsubscribe();
   }, []);
 
@@ -66,7 +74,6 @@ const AccountPage = () => {
       const response = await fetch(
         `http://localhost:5000/api/users/${firebaseId}`
       );
-      if (!response.ok) throw new Error("Failed to fetch user data");
       const data = await response.json();
       setUserData({
         name: data.name || "",
@@ -81,6 +88,25 @@ const AccountPage = () => {
     }
   };
 
+  const fetchOrders = async (uid) => {
+    const res = await fetch(`http://localhost:5000/api/user-orders/${uid}`);
+    const data = await res.json();
+    setOrders(data || []);
+  };
+
+  const fetchSponsorships = async (uid) => {
+    const res = await fetch(`http://localhost:5000/api/sponsorships/${uid}`);
+    const data = await res.json();
+    const filtered = data.filter((s) => s.sponsorId === uid);
+    setSponsorships(filtered || []);
+  };
+
+  const fetchVolunteerEvents = async (uid) => {
+    const res = await fetch(`http://localhost:5000/api/volunteers/user/${uid}`);
+    const data = await res.json();
+    setVolunteerEvents(data || []);
+  };
+
   const handleChange = (e) => {
     setUserData({ ...userData, [e.target.name]: e.target.value });
   };
@@ -88,20 +114,15 @@ const AccountPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!user) return;
-
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/users/${user.uid}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(userData),
-        }
-      );
-      if (!response.ok) throw new Error("Failed to update user data");
+      const res = await fetch(`http://localhost:5000/api/users/${user.uid}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(userData),
+      });
+      if (!res.ok) throw new Error("Update failed");
       setMessage("Profile updated successfully!");
-    } catch (error) {
-      console.error("Error updating user data:", error);
+    } catch {
       setMessage("Failed to update profile.");
     }
   };
@@ -112,18 +133,10 @@ const AccountPage = () => {
 
   const handlePasswordUpdate = async (e) => {
     e.preventDefault();
-    setPasswordMessage("");
-
     if (passwordData.newPassword !== passwordData.confirmNewPassword) {
       setPasswordMessage("New passwords do not match.");
       return;
     }
-
-    if (!user) {
-      setPasswordMessage("You need to be logged in to update your password.");
-      return;
-    }
-
     try {
       const credential = EmailAuthProvider.credential(
         user.email,
@@ -132,19 +145,30 @@ const AccountPage = () => {
       await reauthenticateWithCredential(user, credential);
       await updatePassword(user, passwordData.newPassword);
       setPasswordMessage("Your password has been updated successfully!");
-      setTimeout(() => {
-        setShowPasswordModal(false);
-      }, 2000);
+      setTimeout(() => setShowPasswordModal(false), 2000);
     } catch (error) {
-      const errorMessage = getFriendlyErrorMessage(error.code);
-      setPasswordMessage(errorMessage);
+      setPasswordMessage(getFriendlyErrorMessage(error.code));
     }
   };
+
+  const filterByDate = (items) =>
+    items.filter((item) => {
+      const date =
+        item.instanceDate ||
+        item.event?.date ||
+        item.eventId?.date ||
+        item.createdAt;
+
+      const eventDate = new Date(date);
+      const now = new Date();
+
+      return filterType === "upcoming" ? eventDate >= now : eventDate < now;
+    });
 
   if (loading) return <p>Loading...</p>;
 
   return (
-    <div className="max-w-lg mx-auto p-6 bg-white shadow-lg rounded-lg mt-3">
+    <div className="max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-3">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold">Account Page Details</h2>
         <span
@@ -157,37 +181,31 @@ const AccountPage = () => {
       </div>
       {message && <p className="text-green-500">{message}</p>}
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-gray-700">Name:</label>
-          <input
-            type="text"
-            name="name"
-            value={userData.name}
-            onChange={handleChange}
-            className="w-full p-2 border rounded-lg"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-gray-700">Phone:</label>
-          <input
-            type="text"
-            name="phone"
-            value={userData.phone}
-            onChange={handleChange}
-            className="w-full p-2 border rounded-lg"
-          />
-        </div>
-        <div>
-          <label className="block text-gray-700">Address:</label>
-          <input
-            type="text"
-            name="address"
-            value={userData.address}
-            onChange={handleChange}
-            className="w-full p-2 border rounded-lg"
-          />
-        </div>
+        <input
+          type="text"
+          name="name"
+          value={userData.name}
+          onChange={handleChange}
+          placeholder="Name"
+          required
+          className="w-full p-2 border rounded-lg"
+        />
+        <input
+          type="text"
+          name="phone"
+          value={userData.phone}
+          onChange={handleChange}
+          placeholder="Phone"
+          className="w-full p-2 border rounded-lg"
+        />
+        <input
+          type="text"
+          name="address"
+          value={userData.address}
+          onChange={handleChange}
+          placeholder="Address"
+          className="w-full p-2 border rounded-lg"
+        />
         <button
           type="submit"
           className="w-full bg-blue-500 text-white p-2 rounded-lg"
@@ -217,41 +235,33 @@ const AccountPage = () => {
               </p>
             )}
             <form onSubmit={handlePasswordUpdate} className="space-y-4">
-              <div>
-                <label className="block text-gray-700">Current Password:</label>
-                <input
-                  type="password"
-                  name="currentPassword"
-                  value={passwordData.currentPassword}
-                  onChange={handlePasswordChange}
-                  className="w-full p-2 border rounded-lg"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700">New Password:</label>
-                <input
-                  type="password"
-                  name="newPassword"
-                  value={passwordData.newPassword}
-                  onChange={handlePasswordChange}
-                  className="w-full p-2 border rounded-lg"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700">
-                  Confirm New Password:
-                </label>
-                <input
-                  type="password"
-                  name="confirmNewPassword"
-                  value={passwordData.confirmNewPassword}
-                  onChange={handlePasswordChange}
-                  className="w-full p-2 border rounded-lg"
-                  required
-                />
-              </div>
+              <input
+                type="password"
+                name="currentPassword"
+                value={passwordData.currentPassword}
+                onChange={handlePasswordChange}
+                placeholder="Current Password"
+                className="w-full p-2 border rounded-lg"
+                required
+              />
+              <input
+                type="password"
+                name="newPassword"
+                value={passwordData.newPassword}
+                onChange={handlePasswordChange}
+                placeholder="New Password"
+                className="w-full p-2 border rounded-lg"
+                required
+              />
+              <input
+                type="password"
+                name="confirmNewPassword"
+                value={passwordData.confirmNewPassword}
+                onChange={handlePasswordChange}
+                placeholder="Confirm New Password"
+                className="w-full p-2 border rounded-lg"
+                required
+              />
               <button
                 type="submit"
                 className="w-full bg-green-500 text-white p-2 rounded-lg"
@@ -261,7 +271,7 @@ const AccountPage = () => {
               <button
                 type="button"
                 onClick={() => setShowPasswordModal(false)}
-                className="w-full bg-gray-500 text-white p-2 rounded-lg mt-2"
+                className="w-full bg-gray-500 text-white p-2 rounded-lg"
               >
                 Cancel
               </button>
@@ -269,6 +279,185 @@ const AccountPage = () => {
           </div>
         </div>
       )}
+
+      <div className="mt-10">
+        <h2 className="text-2xl font-bold mb-2">Your Event Engagements</h2>
+        <p className="text-gray-600 mb-4">
+          Track your activities below: view your event orders, sponsorships, and
+          volunteering registrations.
+        </p>
+
+        <div className="flex gap-4 mb-4 border-b pb-2">
+          {["Orders", "Sponsorships", "Volunteering"].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2 rounded-t-md font-semibold ${
+                activeTab === tab
+                  ? "bg-deepBlue text-white"
+                  : "bg-lightBlue text-navyBlue"
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex justify-end mb-4">
+          <select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+            className="p-2 border rounded-md"
+          >
+            <option value="upcoming">Upcoming</option>
+            <option value="past">Past</option>
+          </select>
+        </div>
+
+        <div className="bg-white p-4 rounded-md shadow-md">
+          {activeTab === "Orders" && (
+            <>
+              <h3 className="text-xl font-semibold mb-2">Your Orders</h3>
+              <p className="text-gray-600 mb-4">
+                Below is a list of events you have purchased tickets for. You
+                can filter by upcoming or past event instances.
+              </p>
+
+              {filterByDate(
+                orders.flatMap((o) =>
+                  o.tickets.map((t) => ({ ...t, order: o }))
+                )
+              ).length === 0 ? (
+                <p className="text-gray-500 italic">
+                  You have no orders to show.
+                </p>
+              ) : (
+                filterByDate(
+                  orders.flatMap((order) =>
+                    order.tickets.map((ticket) => ({
+                      ...ticket,
+                      orderDate: order.createdAt,
+                      orderAmount: order.totalAmount,
+                    }))
+                  )
+                ).map((t, i) => (
+                  <div
+                    key={i}
+                    className="border p-3 rounded-md mb-3 bg-lightBlue"
+                  >
+                    <p>
+                      <strong>Event:</strong>{" "}
+                      {t.eventTitle !== "Unknown" ? t.eventTitle : "N/A"}
+                    </p>
+                    <p>
+                      <strong>Event Date:</strong>{" "}
+                      {t.instanceDate
+                        ? new Date(t.instanceDate).toLocaleDateString()
+                        : "N/A"}
+                    </p>
+                    <p>
+                      <strong>Order Date:</strong>{" "}
+                      {new Date(t.orderDate).toLocaleDateString()}
+                    </p>
+                    <p>
+                      <strong>Quantity:</strong> {t.quantity} @ ${t.price} each
+                    </p>
+                    <p>
+                      <strong>Total Paid:</strong> ${t.orderAmount.toFixed(2)}
+                    </p>
+                    <button
+                      className="mt-2 px-4 py-1 bg-navyBlue text-white rounded-md hover:bg-deepBlue flex items-center gap-2"
+                      onClick={() => {}}
+                    >
+                      <FaFileInvoice />
+                      View Invoice
+                    </button>
+                  </div>
+                ))
+              )}
+            </>
+          )}
+
+          {activeTab === "Sponsorships" && (
+            <>
+              <h3 className="text-xl font-semibold mb-2">Your Sponsorships</h3>
+              {filterByDate(sponsorships).length ? (
+                filterByDate(sponsorships).map((s, i) => (
+                  <p key={i} className="text-gray-700 border-b py-2">
+                    ${s.amount} to event {s.eventId}
+                  </p>
+                ))
+              ) : (
+                <p className="text-gray-500 italic">No sponsorships found.</p>
+              )}
+            </>
+          )}
+
+          {activeTab === "Volunteering" && (
+            <>
+              <h3 className="text-xl font-semibold mb-2">
+                Your Volunteer Events
+              </h3>
+              <p className="text-gray-600 mb-4">
+                These are the events you have registered to volunteer for. Use
+                the filter to view past or upcoming events.
+              </p>
+
+              {filterByDate(
+                volunteerEvents.map((v) => ({
+                  ...v,
+                  instanceDate: v.eventId?.date,
+                }))
+              ).length ? (
+                filterByDate(
+                  volunteerEvents.map((v) => ({
+                    ...v,
+                    instanceDate: v.eventId?.date,
+                  }))
+                ).map((v, i) => (
+                  <div
+                    key={i}
+                    className="border p-4 rounded-md mb-3 bg-lightBlue"
+                  >
+                    <p>
+                      <strong>Event:</strong> {v.eventId?.title || "Untitled"}
+                    </p>
+                    <p>
+                      <strong>Date & Time:</strong>{" "}
+                      {new Date(v.eventId?.date).toLocaleDateString()} at{" "}
+                      {v.eventId?.time}
+                    </p>
+                    <p>
+                      <strong>Location:</strong> {v.eventId?.location}
+                    </p>
+                    <div className="flex flex-col items-center mt-2">
+                      <span className="font-semibold mb-1">Access Level:</span>
+                      <span
+                        className={`px-3 py-1 text-sm font-semibold rounded-full text-white ${
+                          v.accessLevel === "Coordinator"
+                            ? "bg-green-600"
+                            : "bg-blue-600"
+                        }`}
+                      >
+                        {v.accessLevel}
+                      </span>
+                    </div>
+
+                    <p>
+                      <strong>Registered On:</strong>{" "}
+                      {new Date(v.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 italic">
+                  No volunteer registrations found.
+                </p>
+              )}
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

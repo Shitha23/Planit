@@ -173,4 +173,62 @@ router.get("/user-ticket-count/:userId/:eventId", async (req, res) => {
   }
 });
 
+// Get all orders placed by a user
+router.get("/user-orders/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const orders = await Order.find({ userId }).sort({ createdAt: -1 }).lean();
+
+    if (!orders.length) return res.json([]);
+
+    const eventInstanceIds = orders.flatMap((order) =>
+      order.tickets.map((ticket) => ticket.eventInstanceId)
+    );
+
+    const eventInstances = await EventInstance.find({
+      _id: { $in: eventInstanceIds },
+    }).lean();
+
+    const eventIds = [
+      ...new Set(eventInstances.map((ei) => ei.eventId.toString())),
+    ];
+
+    const events = await Event.find({ _id: { $in: eventIds } })
+      .select("_id title")
+      .lean();
+
+    const eventMap = {};
+    events.forEach((e) => {
+      eventMap[e._id.toString()] = e.title;
+    });
+
+    const instanceMap = {};
+    eventInstances.forEach((inst) => {
+      instanceMap[inst._id.toString()] = {
+        date: inst.instanceDate,
+        eventId: inst.eventId.toString(),
+      };
+    });
+
+    const enrichedOrders = orders.map((order) => ({
+      ...order,
+      tickets: order.tickets.map((ticket) => {
+        const instance = instanceMap[ticket.eventInstanceId.toString()];
+        const title = eventMap[instance?.eventId] || "Unknown";
+        return {
+          ...ticket,
+          eventTitle: title,
+          instanceDate: instance?.date || null,
+        };
+      }),
+    }));
+
+    res.json(enrichedOrders);
+  } catch (error) {
+    console.error("Error fetching user orders:", error);
+    res.status(500).json({ error: "Failed to fetch user orders" });
+  }
+});
+
 module.exports = router;
