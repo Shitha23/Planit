@@ -23,9 +23,10 @@ const VolunteerPage = ({ userId }) => {
       .get(`http://localhost:5001/api/volunteers/user/${userId}`)
       .then((res) => {
         const status = res.data.reduce((acc, vol) => {
-          acc[vol.eventId] = vol.accessLevel;
+          acc[vol.eventId._id || vol.eventId] = vol.accessLevel;
           return acc;
         }, {});
+        console.log(status);
         setVolunteerStatus(status);
       });
 
@@ -135,20 +136,18 @@ const VolunteerPage = ({ userId }) => {
                   View Volunteer Info
                 </button>
               </>
-            ) : event.volunteerCount >= event.volunteersRequired ? (
-              <p className="mt-2 text-red-600 font-semibold">
-                Volunteer slots are full
-              </p>
             ) : (
-              <button
-                className="mt-4 px-5 py-2 bg-navyBlue hover:bg-deepBlue text-white font-medium rounded-lg shadow-md"
-                onClick={() => {
-                  setSelectedEvent(event);
-                  setShowModal(true);
-                }}
-              >
-                Register as Volunteer
-              </button>
+              event.volunteerCount < event.volunteersRequired && (
+                <button
+                  className="mt-4 px-5 py-2 bg-navyBlue hover:bg-deepBlue text-white font-medium rounded-lg shadow-md"
+                  onClick={() => {
+                    setSelectedEvent(event);
+                    setShowModal(true);
+                  }}
+                >
+                  Register as Volunteer
+                </button>
+              )
             )}
           </div>
         ))}

@@ -4,6 +4,42 @@ const EventQuery = require("../models/EventQuery");
 const User = require("../models/User");
 const Event = require("../models/Event");
 const router = express.Router();
+const Notification = require("../models/Notification");
+const { sendEmail } = require("../config/emailService");
+
+router.put("/reply/:queryId", async (req, res) => {
+  try {
+    const { reply } = req.body;
+
+    const query = await EventQuery.findById(req.params.queryId)
+      .populate("userId")
+      .populate("eventId", "title");
+
+    if (!query) {
+      return res.status(404).json({ error: "Query not found" });
+    }
+
+    query.reply = reply;
+    query.status = "Responded";
+    await query.save();
+
+    await Notification.create({
+      userId: query.userId._id,
+      message: `You received a response to your query for event: ${query.eventId.title}`,
+    });
+
+    await sendEmail(
+      query.userId.email,
+      "Your Event Query Received a Response",
+      `Hi ${query.userId.name},\n\nYou received a reply to your query regarding the event "${query.eventId.title}".\n\nYour question: "${query.query}"\n\nResponse: "${reply}"\n\nVisit your dashboard to view more.\n\nThank you!`
+    );
+
+    res.json({ message: "Reply sent and user notified." });
+  } catch (error) {
+    console.error("Error replying to query:", error);
+    res.status(500).json({ error: "Error sending reply" });
+  }
+});
 
 router.post("/event-queries", async (req, res) => {
   try {
@@ -69,6 +105,27 @@ router.get("/event-queries/:eventId", async (req, res) => {
   } catch (error) {
     console.error("Error fetching event queries:", error);
     res.status(500).json({ error: "Error fetching event queries." });
+  }
+});
+
+router.get("/user-queries/:firebaseId", async (req, res) => {
+  try {
+    const { firebaseId } = req.params;
+
+    const user = await User.findOne({ firebaseId });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const queries = await EventQuery.find({ userId: user._id })
+      .populate("eventId", "title date")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.json(queries);
+  } catch (error) {
+    console.error("Error fetching user queries:", error);
+    res.status(500).json({ error: "Failed to fetch user queries" });
   }
 });
 
