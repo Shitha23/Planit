@@ -86,10 +86,19 @@ router.put("/:requestId", async (req, res) => {
 
     // If approved, update the user's role
     if (status === "Approved") {
-      await User.findOneAndUpdate(
+      const user = await User.findOneAndUpdate(
         { firebaseId: request.userId },
-        { role: "organizer" }
+        { role: "organizer" },
+        { new: true }
       );
+
+      if (user?.email) {
+        await sendEmail(
+          user.email,
+          "Organizer Request Approved",
+          `Hi ${user.name},\n\nCongratulations! Your request to become an organizer has been approved.\n\nYou can now create, manage, and host events using your account.\n\nBest regards,\nPlan-It Team`
+        );
+      }
     }
 
     res.json({

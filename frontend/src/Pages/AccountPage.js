@@ -38,6 +38,7 @@ const AccountPage = () => {
     role: "customer",
   });
   const [loading, setLoading] = useState(true);
+  const [userQueries, setUserQueries] = useState([]);
   const [message, setMessage] = useState("");
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordData, setPasswordData] = useState({
@@ -61,6 +62,7 @@ const AccountPage = () => {
         fetchUserData(currentUser.uid);
         fetchOrders(currentUser.uid);
         fetchSponsorships(currentUser.uid);
+        fetchUserQueries(currentUser.uid);
         fetchVolunteerEvents(currentUser.uid);
       } else {
         setLoading(false);
@@ -85,6 +87,16 @@ const AccountPage = () => {
       console.error("Error fetching user data:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUserQueries = async (uid) => {
+    try {
+      const res = await fetch(`http://localhost:5001/api/user-queries/${uid}`);
+      const data = await res.json();
+      setUserQueries(data || []);
+    } catch (err) {
+      console.error("Error fetching user queries:", err);
     }
   };
 
@@ -168,7 +180,7 @@ const AccountPage = () => {
   if (loading) return <p>Loading...</p>;
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-3">
+    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-3">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold">Account Page Details</h2>
         <span
@@ -457,6 +469,57 @@ const AccountPage = () => {
             </>
           )}
         </div>
+      </div>
+
+      <div className="mt-10">
+        <h3 className="text-xl font-semibold mb-2">Your Event Queries</h3>
+        <p className="text-gray-600 mb-4">
+          Below are queries you've submitted to event organizers. You’ll see
+          replies and status here.
+        </p>
+
+        {userQueries.length === 0 ? (
+          <p className="text-gray-500 italic">
+            You haven’t raised any queries yet.
+          </p>
+        ) : (
+          userQueries.map((q, i) => (
+            <div key={i} className="border p-4 rounded-md mb-3 bg-lightBlue">
+              <p>
+                <strong>Event:</strong> {q.eventId?.title || "Untitled"}
+              </p>
+              <p>
+                <strong>Query:</strong> {q.query}
+              </p>
+              <p>
+                <strong>Status:</strong>{" "}
+                <span
+                  className={`font-semibold ${
+                    q.status === "Responded"
+                      ? "text-green-600"
+                      : "text-yellow-600"
+                  }`}
+                >
+                  {q.status}
+                </span>
+              </p>
+              <p>
+                <strong>Reply:</strong>{" "}
+                {q.reply ? (
+                  q.reply
+                ) : (
+                  <span className="text-gray-500 italic">
+                    Not yet responded
+                  </span>
+                )}
+              </p>
+              <p>
+                <strong>Asked On:</strong>{" "}
+                {new Date(q.createdAt).toLocaleDateString()}
+              </p>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

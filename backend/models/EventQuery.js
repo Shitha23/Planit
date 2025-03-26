@@ -28,6 +28,12 @@ const eventQuerySchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  reply: { type: String },
+  status: {
+    type: String,
+    enum: ["Pending", "Responded"],
+    default: "Pending",
+  },
 });
 
 module.exports = mongoose.model("EventQuery", eventQuerySchema);
