@@ -16,7 +16,7 @@ const TicketAnalysisDashboard = () => {
   const fetchSalesSummary = async () => {
     const organizerId = localStorage.getItem("firebaseId");
     const response = await fetch(
-      `http://localhost:5000/api/sales-summary?organizerId=${organizerId}`
+      `http://localhost:5001/api/sales-summary?organizerId=${organizerId}`
     );
     const data = await response.json();
     setSalesSummary(data);
@@ -25,7 +25,7 @@ const TicketAnalysisDashboard = () => {
   const fetchOrders = async () => {
     const organizerId = localStorage.getItem("firebaseId");
     const response = await fetch(
-      `http://localhost:5000/api/orders?organizerId=${organizerId}`
+      `http://localhost:5001/api/orders?organizerId=${organizerId}`
     );
     const data = await response.json();
     setOrders(data);
@@ -34,7 +34,7 @@ const TicketAnalysisDashboard = () => {
   const fetchSalesTimeline = async () => {
     const organizerId = localStorage.getItem("firebaseId");
     const response = await fetch(
-      `http://localhost:5000/api/timeline?organizerId=${organizerId}`
+      `http://localhost:5001/api/timeline?organizerId=${organizerId}`
     );
     const data = await response.json();
     setSalesTimeline(data);

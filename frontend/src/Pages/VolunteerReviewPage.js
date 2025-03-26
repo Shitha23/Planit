@@ -13,14 +13,14 @@ const VolunteerReviewPage = ({ organizerId }) => {
   const fetchEventsAndVolunteers = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/organizer/${organizerId}`
+        `http://localhost:5001/api/organizer/${organizerId}`
       );
       const eventsData = res.data;
 
       const eventsWithVolunteers = await Promise.all(
         eventsData.map(async (event) => {
           const volRes = await axios.get(
-            `http://localhost:5000/api/volunteers/event/${event._id}`
+            `http://localhost:5001/api/volunteers/event/${event._id}`
           );
           return { ...event, volunteers: volRes.data };
         })
@@ -36,7 +36,7 @@ const VolunteerReviewPage = ({ organizerId }) => {
 
   const handleAction = async (volunteerId, action) => {
     try {
-      await axios.put(`http://localhost:5000/api/volunteers/${action}`, {
+      await axios.put(`http://localhost:5001/api/volunteers/${action}`, {
         volunteerId,
       });
       fetchEventsAndVolunteers();

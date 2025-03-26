@@ -15,7 +15,7 @@ const BookTicketPage = ({ cart, setCart }) => {
   const [alert, setAlert] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/ticketevents")
+    fetch("http://localhost:5001/api/ticketevents")
       .then((res) => res.json())
       .then((data) => setEvents(data))
       .catch((err) => console.error("Error fetching events:", err));

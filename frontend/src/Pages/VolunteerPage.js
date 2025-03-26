@@ -16,11 +16,11 @@ const VolunteerPage = ({ userId }) => {
     if (!userId) return;
 
     axios
-      .get("http://localhost:5000/api/events/need-volunteers")
+      .get("http://localhost:5001/api/events/need-volunteers")
       .then((res) => setEvents(res.data));
 
     axios
-      .get(`http://localhost:5000/api/volunteers/user/${userId}`)
+      .get(`http://localhost:5001/api/volunteers/user/${userId}`)
       .then((res) => {
         const status = res.data.reduce((acc, vol) => {
           acc[vol.eventId] = vol.accessLevel;
@@ -30,7 +30,7 @@ const VolunteerPage = ({ userId }) => {
       });
 
     axios
-      .get(`http://localhost:5000/api/auth/user/${userId}`)
+      .get(`http://localhost:5001/api/auth/user/${userId}`)
       .then((res) => setUserDetails(res.data));
   }, [userId]);
 
@@ -43,7 +43,7 @@ const VolunteerPage = ({ userId }) => {
       };
 
       await axios.post(
-        "http://localhost:5000/api/volunteers/register",
+        "http://localhost:5001/api/volunteers/register",
         payload
       );
 

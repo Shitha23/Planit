@@ -17,7 +17,7 @@ const OrganizerQueryDetails = () => {
   const fetchEventDetails = async (eventId) => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/event/${eventId}`
+        `http://localhost:5001/api/event/${eventId}`
       );
       setEventTitle(response.data.title);
     } catch (error) {
@@ -30,7 +30,7 @@ const OrganizerQueryDetails = () => {
     setLoading(true);
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/event-queries/${eventId}`
+        `http://localhost:5001/api/event-queries/${eventId}`
       );
       setQueries(response.data);
     } catch (error) {

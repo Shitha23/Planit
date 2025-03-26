@@ -17,7 +17,7 @@ const EventQueryForm = ({ eventId }) => {
   const fetchUserDetails = async (firebaseId) => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/auth/user/${firebaseId}`
+        `http://localhost:5001/api/auth/user/${firebaseId}`
       );
       setEmail(response.data.email || "");
     } catch (error) {
@@ -33,7 +33,7 @@ const EventQueryForm = ({ eventId }) => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/event-queries",
+        "http://localhost:5001/api/event-queries",
         {
           eventId,
           email,

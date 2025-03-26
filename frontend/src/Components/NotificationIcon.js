@@ -18,7 +18,7 @@ const NotificationIcon = ({ userId }) => {
   const fetchNotifications = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/notifications",
+        "http://localhost:5001/api/notifications",
         {
           headers: { "user-id": userId },
         }
@@ -35,7 +35,7 @@ const NotificationIcon = ({ userId }) => {
   const markAllAsRead = async () => {
     try {
       await axios.put(
-        "http://localhost:5000/api/notifications/mark-read",
+        "http://localhost:5001/api/notifications/mark-read",
         {},
         {
           headers: { "user-id": userId },

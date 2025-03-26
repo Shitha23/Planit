@@ -14,7 +14,7 @@ const AdminOrganizerRequests = () => {
   const fetchRequests = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/organizer-request"
+        "http://localhost:5001/api/organizer-request"
       );
       setRequests(response.data.filter((req) => req.status === "Pending"));
     } catch (error) {
@@ -24,7 +24,7 @@ const AdminOrganizerRequests = () => {
 
   const fetchApprovedUsers = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/admin/users");
+      const response = await axios.get("http://localhost:5001/api/admin/users");
       const organizers = response.data.filter(
         (user) => user.role === "organizer"
       );
@@ -37,10 +37,10 @@ const AdminOrganizerRequests = () => {
   const handleApproveRequest = async (requestId, email) => {
     try {
       await axios.put(
-        `http://localhost:5000/api/organizer-request/${requestId}`,
+        `http://localhost:5001/api/organizer-request/${requestId}`,
         { status: "Approved" }
       );
-      await axios.put("http://localhost:5000/api/admin/update-role", {
+      await axios.put("http://localhost:5001/api/admin/update-role", {
         email,
         newRole: "organizer",
       });
@@ -59,7 +59,7 @@ const AdminOrganizerRequests = () => {
   const handleRejectRequest = async (requestId) => {
     try {
       await axios.put(
-        `http://localhost:5000/api/organizer-request/${requestId}`,
+        `http://localhost:5001/api/organizer-request/${requestId}`,
         { status: "Rejected" }
       );
 

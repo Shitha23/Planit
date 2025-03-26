@@ -16,7 +16,7 @@ const AdminPage = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:5000/api/admin/users");
+      const response = await fetch("http://localhost:5001/api/admin/users");
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -40,7 +40,7 @@ const AdminPage = () => {
     try {
       const token = await auth.currentUser.getIdToken();
       const response = await fetch(
-        "http://localhost:5000/api/admin/update-role",
+        "http://localhost:5001/api/admin/update-role",
         {
           method: "PUT",
           headers: {

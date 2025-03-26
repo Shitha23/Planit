@@ -42,7 +42,7 @@ const Header = ({ onOpenLogin, onOpenSignup, cart = [] }) => {
         } else {
           try {
             const response = await fetch(
-              `http://localhost:5000/api/auth/user/${currentUser.uid}`
+              `http://localhost:5001/api/auth/user/${currentUser.uid}`
             );
             if (!response.ok) throw new Error("Failed to fetch role");
             const data = await response.json();
@@ -68,7 +68,7 @@ const Header = ({ onOpenLogin, onOpenSignup, cart = [] }) => {
   const fetchMongoUserId = async (firebaseUid) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/users/mongo-id/${firebaseUid}`
+        `http://localhost:5001/api/users/mongo-id/${firebaseUid}`
       );
       if (!response.ok) throw new Error("Failed to fetch MongoDB user ID");
       const data = await response.json();

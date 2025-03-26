@@ -17,14 +17,14 @@ const EventDetailsForBooking = ({ cart, setCart }) => {
   const [alert, setAlert] = useState(null);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/event/${id}`)
+    fetch(`http://localhost:5001/api/event/${id}`)
       .then((res) => res.json())
       .then((data) => setEvent(data))
       .catch((err) => console.error("Error fetching event:", err));
   }, [id]);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/tickets-sold/${id}`)
+    fetch(`http://localhost:5001/api/tickets-sold/${id}`)
       .then((res) => res.json())
       .then((data) => {
         setTicketsSold(data.ticketsSold);

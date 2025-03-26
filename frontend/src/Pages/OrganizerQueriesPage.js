@@ -27,7 +27,7 @@ const OrganizerQueriesPage = () => {
     try {
       if (!id) return;
       const response = await axios.get(
-        `http://localhost:5000/api/organizer-events/${id}`
+        `http://localhost:5001/api/organizer-events/${id}`
       );
       setEvents(response.data);
     } catch (error) {
