@@ -27,7 +27,7 @@ const Home = () => {
   useEffect(() => {
     const fetchUpcomingEvents = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/upcoming");
+        const response = await axios.get("http://localhost:5001/api/upcoming");
         setEvents(response.data);
       } catch (error) {
         console.error("Error fetching upcoming events:", error);
@@ -61,7 +61,7 @@ const Home = () => {
         if (!firebaseId) return;
 
         const response = await axios.get(
-          `http://localhost:5000/api/auth/user/${firebaseId}`
+          `http://localhost:5001/api/auth/user/${firebaseId}`
         );
         if (response.data) {
           setFormData({
@@ -106,7 +106,7 @@ const Home = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/organizer-request",
+        "http://localhost:5001/api/organizer-request",
         requestData
       );
       setAlert({ message: response.data.message, type: "success" });

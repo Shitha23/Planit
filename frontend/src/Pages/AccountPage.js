@@ -72,7 +72,7 @@ const AccountPage = () => {
   const fetchUserData = async (firebaseId) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/users/${firebaseId}`
+        `http://localhost:5001/api/users/${firebaseId}`
       );
       const data = await response.json();
       setUserData({
@@ -89,20 +89,20 @@ const AccountPage = () => {
   };
 
   const fetchOrders = async (uid) => {
-    const res = await fetch(`http://localhost:5000/api/user-orders/${uid}`);
+    const res = await fetch(`http://localhost:5001/api/user-orders/${uid}`);
     const data = await res.json();
     setOrders(data || []);
   };
 
   const fetchSponsorships = async (uid) => {
-    const res = await fetch(`http://localhost:5000/api/sponsorships/${uid}`);
+    const res = await fetch(`http://localhost:5001/api/sponsorships/${uid}`);
     const data = await res.json();
     const filtered = data.filter((s) => s.sponsorId === uid);
     setSponsorships(filtered || []);
   };
 
   const fetchVolunteerEvents = async (uid) => {
-    const res = await fetch(`http://localhost:5000/api/volunteers/user/${uid}`);
+    const res = await fetch(`http://localhost:5001/api/volunteers/user/${uid}`);
     const data = await res.json();
     setVolunteerEvents(data || []);
   };
@@ -115,7 +115,7 @@ const AccountPage = () => {
     e.preventDefault();
     if (!user) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/users/${user.uid}`, {
+      const res = await fetch(`http://localhost:5001/api/users/${user.uid}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userData),

@@ -94,7 +94,7 @@ const AuthForm = ({ type, onClose, setSuccessMessage, setErrorMessage }) => {
         });
 
         const firebaseId = user.uid;
-        await axios.post("http://localhost:5000/api/auth/signup", {
+        await axios.post("http://localhost:5001/api/auth/signup", {
           ...formData,
           firebaseId,
         });
@@ -114,7 +114,7 @@ const AuthForm = ({ type, onClose, setSuccessMessage, setErrorMessage }) => {
         const user = userCredential.user;
 
         const response = await axios.get(
-          `http://localhost:5000/api/auth/user/${user.uid}`
+          `http://localhost:5001/api/auth/user/${user.uid}`
         );
 
         if (response.data && response.data.name) {
@@ -139,11 +139,11 @@ const AuthForm = ({ type, onClose, setSuccessMessage, setErrorMessage }) => {
       const { uid, displayName, email } = user;
 
       let existingUser = await axios
-        .get(`http://localhost:5000/api/auth/user/${uid}`)
+        .get(`http://localhost:5001/api/auth/user/${uid}`)
         .catch(() => ({}));
 
       if (!existingUser?.data) {
-        await axios.post("http://localhost:5000/api/auth/signup", {
+        await axios.post("http://localhost:5001/api/auth/signup", {
           firebaseId: uid,
           name: displayName || "Google User",
           email,

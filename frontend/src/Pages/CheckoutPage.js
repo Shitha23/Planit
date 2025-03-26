@@ -19,7 +19,7 @@ const CheckoutPage = ({ cart, setCart }) => {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:5000/api/auth/user/${uid}`)
+      .get(`http://localhost:5001/api/auth/user/${uid}`)
       .then((response) => {
         if (response.status === 200) {
           setUserData((prevData) => ({
@@ -58,7 +58,7 @@ const CheckoutPage = ({ cart, setCart }) => {
       console.log(uid);
       for (const item of cart) {
         const response = await axios.get(
-          `http://localhost:5000/api/user-ticket-count/${uid}/${item._id}`
+          `http://localhost:5001/api/user-ticket-count/${uid}/${item._id}`
         );
 
         const totalTicketsBooked = response.data.totalTicketsBooked;
@@ -85,7 +85,7 @@ const CheckoutPage = ({ cart, setCart }) => {
       };
 
       const response = await axios.post(
-        "http://localhost:5000/api/order",
+        "http://localhost:5001/api/order",
         orderData
       );
 
