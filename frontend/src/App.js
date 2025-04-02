@@ -29,9 +29,11 @@ import OrganizerQueryDetails from "./Pages/OrganizerQueryDetails";
 import VolunteerPage from "./Pages/VolunteerPage";
 import SponsorshipPage from "./Pages/SponsorshipPage";
 import AccountPage from "./Pages/AccountPage";
+import SponsorshipCancelled from "./Pages/SponsorshipCancelled";
 import PaymentCancelled from "./Pages/PaymentCancelled";
 import AdminOrganizerRequests from "./Pages/AdminOrganizerRequests";
 import VolunteerReviewPage from "./Pages/VolunteerReviewPage";
+import SponsorshipSuccess from "./Pages/SponsorshipSuccess";
 
 const PrivateRoute = ({ requiredRole, userRole }) => {
   if (!userRole || userRole !== requiredRole) {
@@ -184,6 +186,11 @@ function App() {
             element={<BookTicketPage cart={cart} setCart={setCart} />}
           />
           <Route path="/account" element={<AccountPage />} />
+          <Route path="sponsorship-success" element={<SponsorshipSuccess />} />
+          <Route
+            path="/sponsorship-cancelled"
+            element={<SponsorshipCancelled />}
+          />
           <Route path="/payment-cancelled" element={<PaymentCancelled />} />
           <Route
             path="/checkout"
