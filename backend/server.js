@@ -10,13 +10,14 @@ const ticket = require("./routes/ticket-analysis");
 const eventQueries = require("./routes/eventqueries");
 const volunteer = require("./routes/volunteer");
 const userRoutes = require("./routes/userRoutes");
-const stripeRoutes = require("./routes/stripe");
 const sponsorship = require("./routes/sponsorship");
 const adminRoutes = require("./routes/admin");
 const organizerRequestRoutes = require("./routes/organizerRequest");
 const reviewRoutes = require("./routes/review");
 const newsletterRoutes = require("./routes/newsletter");
 const notificationRoutes = require("./routes/notifications");
+const stripeRoutes = require("./routes/stripe");
+const stripeSponsorship = require("./routes/stripeSponsorship");
 
 const app = express();
 
@@ -41,7 +42,9 @@ app.get("/", (req, res) => {
 app.use("/api/auth", auth);
 app.use("/api", event);
 app.use("/api", order);
+app.use("/api", stripeSponsorship);
 app.use("/api", volunteer);
+app.use("/api", stripeRoutes);
 app.use("/api", ticket);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api", eventQueries);
@@ -50,7 +53,6 @@ app.use("/api/users", userRoutes);
 app.use("/api/newsletter", newsletterRoutes);
 app.use("/api/organizer-request", organizerRequestRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/api", stripeRoutes);
 app.use("/api/notifications", notificationRoutes);
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
