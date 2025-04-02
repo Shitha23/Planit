@@ -396,7 +396,16 @@ const AccountPage = () => {
               {filterByDate(sponsorships).length ? (
                 filterByDate(sponsorships).map((s, i) => (
                   <p key={i} className="text-gray-700 border-b py-2">
-                    ${s.amount} to event {s.eventId}
+                    You sponsored{" "}
+                    <strong>{s.eventId?.title || "Untitled"}</strong> with{" "}
+                    <strong>${s.amount}</strong>
+                    <br />
+                    Location: {s.eventId?.location || "N/A"} <br />
+                    Date:{" "}
+                    {s.eventId?.date
+                      ? new Date(s.eventId.date).toLocaleDateString()
+                      : "N/A"}{" "}
+                    at {s.eventId?.time || "N/A"}
                   </p>
                 ))
               ) : (

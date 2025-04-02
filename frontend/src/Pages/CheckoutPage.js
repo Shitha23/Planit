@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { loadStripe } from "@stripe/stripe-js";
 
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 const TAX_RATE = 0.13;
 
 const CheckoutPage = ({ cart, setCart }) => {
@@ -14,25 +16,19 @@ const CheckoutPage = ({ cart, setCart }) => {
   });
   const [totalPrice, setTotalPrice] = useState(0);
   const [alertMessage, setAlertMessage] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState("cod");
 
   const uid = localStorage.getItem("firebaseId");
 
   useEffect(() => {
     axios
       .get(`http://localhost:5001/api/auth/user/${uid}`)
-      .then((response) => {
-        if (response.status === 200) {
-          setUserData((prevData) => ({
-            ...prevData,
-            ...response.data,
-          }));
-        } else {
-          console.error("User not found:", response);
+      .then((res) => {
+        if (res.status === 200) {
+          setUserData((prev) => ({ ...prev, ...res.data }));
         }
       })
-      .catch((error) => {
-        console.error("Error fetching user data:", error);
-      });
+      .catch((err) => console.error("User fetch error:", err));
   }, [uid]);
 
   useEffect(() => {
@@ -55,15 +51,12 @@ const CheckoutPage = ({ cart, setCart }) => {
         return;
       }
 
-      console.log(uid);
       for (const item of cart) {
-        const response = await axios.get(
+        const res = await axios.get(
           `http://localhost:5001/api/user-ticket-count/${uid}/${item._id}`
         );
-
-        const totalTicketsBooked = response.data.totalTicketsBooked;
-
-        if (totalTicketsBooked + item.quantity > 2) {
+        const totalBooked = res.data.totalTicketsBooked;
+        if (totalBooked + item.quantity > 2) {
           setAlertMessage(
             `You cannot book more than 2 tickets for ${item.title}!`
           );
@@ -71,31 +64,57 @@ const CheckoutPage = ({ cart, setCart }) => {
         }
       }
 
-      const orderData = {
-        userId: uid,
-        tickets: cart.map((item) => ({
-          eventInstanceId: item.eventInstanceId,
-          ticketId: item._id,
-          quantity: item.quantity,
-          price: item.ticketPrice,
-        })),
-        totalAmount: totalPrice,
-        paymentStatus: "Completed",
-        orderStatus: "Confirmed",
-      };
+      if (paymentMethod === "cod") {
+        const orderData = {
+          userId: uid,
+          tickets: cart.map((item) => ({
+            eventInstanceId: item.eventInstanceId,
+            ticketId: item._id,
+            quantity: item.quantity,
+            price: item.ticketPrice,
+          })),
+          totalAmount: totalPrice,
+          paymentStatus: "Pending",
+          orderStatus: "COD Requested",
+        };
 
-      const response = await axios.post(
-        "http://localhost:5001/api/order",
-        orderData
-      );
+        const res = await axios.post(
+          "http://localhost:5001/api/order",
+          orderData
+        );
 
-      if (response.status === 201) {
-        localStorage.removeItem("cart");
-        setCart([]);
-        navigate("/order-success");
+        if (res.status === 201) {
+          localStorage.removeItem("cart");
+          setCart([]);
+          navigate("/order-success");
+        }
+      } else if (paymentMethod === "card") {
+        const stripe = await stripePromise;
+        const sessionRes = await axios.post(
+          "http://localhost:5001/api/create-stripe-session",
+          {
+            userId: uid,
+            cart: cart.map((item) => ({
+              name: item.title,
+              quantity: item.quantity,
+              price: item.ticketPrice,
+              eventInstanceId: item.eventInstanceId,
+              ticketId: item._id,
+            })),
+            totalAmount: totalPrice,
+          }
+        );
+
+        const result = await stripe.redirectToCheckout({
+          sessionId: sessionRes.data.id,
+        });
+
+        if (result.error) {
+          setAlertMessage(result.error.message);
+        }
       }
-    } catch (error) {
-      setAlertMessage(error.response?.data?.error || "Error placing order.");
+    } catch (err) {
+      setAlertMessage(err.response?.data?.error || "Checkout error occurred.");
     }
   };
 
@@ -145,6 +164,31 @@ const CheckoutPage = ({ cart, setCart }) => {
           className="w-full p-2 border border-blueGray rounded-xl"
           disabled={!!userData.address}
         />
+
+        <div className="space-y-2">
+          <label className="font-medium">Select Payment Method:</label>
+          <div className="flex gap-4">
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                value="cod"
+                checked={paymentMethod === "cod"}
+                onChange={() => setPaymentMethod("cod")}
+              />
+              Cash on Delivery
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                value="card"
+                checked={paymentMethod === "card"}
+                onChange={() => setPaymentMethod("card")}
+              />
+              Pay with Card
+            </label>
+          </div>
+        </div>
+
         <div className="border border-gray-300 rounded-xl p-4 mt-4">
           <h3 className="text-lg font-bold mb-2">Order Summary</h3>
           {cart.length === 0 ? (
@@ -168,15 +212,18 @@ const CheckoutPage = ({ cart, setCart }) => {
             <span>${totalPrice.toFixed(2)}</span>
           </div>
         </div>
+
         <button
           onClick={handleCheckout}
           className="w-full mt-4 bg-deepBlue hover:bg-navyBlue text-white py-2 rounded-xl text-lg font-semibold"
         >
-          Proceed to Cash on Delivery
+          {paymentMethod === "cod" ? "Confirm COD Order" : "Pay with Card"}
         </button>
+
         <p className="text-sm text-gray-500">
-          *Payment gateway will be implemented later
+          *Stripe payment gateway is integrated for card payments
         </p>
+
         <button
           onClick={() => navigate("/cart")}
           className="w-full mt-2 bg-lightBlue hover:bg-mediumBlue text-black py-2 rounded-xl"
