@@ -29,6 +29,7 @@ import OrganizerQueryDetails from "./Pages/OrganizerQueryDetails";
 import VolunteerPage from "./Pages/VolunteerPage";
 import SponsorshipPage from "./Pages/SponsorshipPage";
 import AccountPage from "./Pages/AccountPage";
+import PaymentCancelled from "./Pages/PaymentCancelled";
 import AdminOrganizerRequests from "./Pages/AdminOrganizerRequests";
 import VolunteerReviewPage from "./Pages/VolunteerReviewPage";
 
@@ -183,6 +184,7 @@ function App() {
             element={<BookTicketPage cart={cart} setCart={setCart} />}
           />
           <Route path="/account" element={<AccountPage />} />
+          <Route path="/payment-cancelled" element={<PaymentCancelled />} />
           <Route
             path="/checkout"
             element={<CheckoutPage cart={cart} setCart={setCart} />}
