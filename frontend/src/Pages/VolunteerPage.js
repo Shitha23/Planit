@@ -26,7 +26,6 @@ const VolunteerPage = ({ userId }) => {
           acc[vol.eventId._id || vol.eventId] = vol.accessLevel;
           return acc;
         }, {});
-        console.log(status);
         setVolunteerStatus(status);
       });
 
@@ -80,6 +79,63 @@ const VolunteerPage = ({ userId }) => {
     );
   }
 
+  const now = new Date();
+  const upcomingEvents = events.filter((e) => new Date(e.date) >= now);
+  const pastEvents = events.filter((e) => new Date(e.date) < now);
+
+  const renderEventCard = (event, isPast = false) => {
+    const isRegistered = !!volunteerStatus[event._id];
+    const userRole = volunteerStatus[event._id];
+
+    return (
+      <div
+        key={event._id}
+        className="p-6 bg-white border border-gray-200 rounded-lg shadow-lg"
+      >
+        <h3 className="text-xl font-semibold text-gray-900">{event.title}</h3>
+        <p className="text-gray-600 mt-2">{event.description}</p>
+        <p className="mt-2">
+          <strong className="text-gray-700">Location:</strong> {event.location}
+        </p>
+        <p>
+          <strong className="text-gray-700">Date:</strong>{" "}
+          {new Date(event.date).toLocaleDateString()}
+        </p>
+        <p className="mt-2 text-blue-600 font-semibold">
+          Volunteers Registered: {event.volunteerCount} /{" "}
+          {event.volunteersRequired}
+        </p>
+
+        {isRegistered ? (
+          <>
+            <p className="mt-2 text-green-600 font-semibold">
+              Registered as {userRole}
+            </p>
+            <button
+              className="mt-2 px-4 py-1 bg-indigo-600 text-white rounded shadow"
+              onClick={() => {
+                setViewInfoEvent(event);
+                setShowInfoModal(true);
+              }}
+            >
+              View Volunteer Info
+            </button>
+          </>
+        ) : !isPast && event.volunteerCount < event.volunteersRequired ? (
+          <button
+            className="mt-4 px-5 py-2 bg-navyBlue hover:bg-deepBlue text-white font-medium rounded-lg shadow-md"
+            onClick={() => {
+              setSelectedEvent(event);
+              setShowModal(true);
+            }}
+          >
+            Register as Volunteer
+          </button>
+        ) : null}
+      </div>
+    );
+  };
+
   return (
     <div className="p-6 bg-gray-100 min-h-screen relative">
       <h2 className="text-4xl font-extrabold text-navyBlue mb-8">
@@ -98,59 +154,16 @@ const VolunteerPage = ({ userId }) => {
         </div>
       )}
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {events.map((event) => (
-          <div
-            key={event._id}
-            className="p-6 bg-white border border-gray-200 rounded-lg shadow-lg"
-          >
-            <h3 className="text-xl font-semibold text-gray-900">
-              {event.title}
-            </h3>
-            <p className="text-gray-600 mt-2">{event.description}</p>
-            <p className="mt-2">
-              <strong className="text-gray-700">Location:</strong>{" "}
-              {event.location}
-            </p>
-            <p>
-              <strong className="text-gray-700">Date:</strong>{" "}
-              {new Date(event.date).toLocaleDateString()}
-            </p>
-            <p className="mt-2 text-blue-600 font-semibold">
-              Volunteers Registered: {event.volunteerCount} /{" "}
-              {event.volunteersRequired}
-            </p>
+      <h3 className="text-2xl font-bold mb-4">
+        Upcoming Volunteer Opportunities
+      </h3>
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+        {upcomingEvents.map((event) => renderEventCard(event))}
+      </div>
 
-            {volunteerStatus[event._id] ? (
-              <>
-                <p className="mt-2 text-green-600 font-semibold">
-                  Registered as {volunteerStatus[event._id]}
-                </p>
-                <button
-                  className="mt-2 px-4 py-1 bg-indigo-600 text-white rounded shadow"
-                  onClick={() => {
-                    setViewInfoEvent(event);
-                    setShowInfoModal(true);
-                  }}
-                >
-                  View Volunteer Info
-                </button>
-              </>
-            ) : (
-              event.volunteerCount < event.volunteersRequired && (
-                <button
-                  className="mt-4 px-5 py-2 bg-navyBlue hover:bg-deepBlue text-white font-medium rounded-lg shadow-md"
-                  onClick={() => {
-                    setSelectedEvent(event);
-                    setShowModal(true);
-                  }}
-                >
-                  Register as Volunteer
-                </button>
-              )
-            )}
-          </div>
-        ))}
+      <h3 className="text-2xl font-bold mb-4">Past Events</h3>
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {pastEvents.map((event) => renderEventCard(event, true))}
       </div>
 
       {showModal && selectedEvent && userDetails && (
@@ -177,7 +190,7 @@ const VolunteerPage = ({ userId }) => {
               </strong>
             </p>
 
-            <p className="mt-4 font-semibold">Want to become an Coordinator?</p>
+            <p className="mt-4 font-semibold">Want to become a Coordinator?</p>
             <textarea
               className="w-full mt-2 p-2 border rounded"
               rows="3"

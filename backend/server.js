@@ -20,6 +20,19 @@ const stripeRoutes = require("./routes/stripe");
 const stripeSponsorship = require("./routes/stripeSponsorship");
 
 const app = express();
+const cron = require("node-cron");
+const axios = require("axios");
+
+cron.schedule("0 9 * * *", async () => {
+  try {
+    await axios.post(
+      "http://localhost:5001/api/notifications/remind-upcoming-events"
+    );
+    console.log("Reminder job executed.");
+  } catch (err) {
+    console.error("Reminder job failed:", err.message);
+  }
+});
 
 app.use(cors());
 app.use(express.json());
