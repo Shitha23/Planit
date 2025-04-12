@@ -1,24 +1,52 @@
-import { Link } from "react-router-dom";
-import { FaCheckCircle } from "react-icons/fa";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-const OrderSuccessPage = () => {
+const OrderSuccessPage = ({ setCart }) => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const completeOrder = async () => {
+      const cart = JSON.parse(sessionStorage.getItem("cart"));
+      const userId = sessionStorage.getItem("userId");
+      const totalAmount = parseFloat(sessionStorage.getItem("totalAmount"));
+
+      if (!cart || !userId || !totalAmount) {
+        navigate("/");
+        return;
+      }
+
+      try {
+        await axios.post("http://localhost:5001/api/order", {
+          userId,
+          tickets: cart.map((item) => ({
+            eventInstanceId: item.eventInstanceId,
+            ticketId: item._id,
+            quantity: item.quantity,
+            price: item.ticketPrice,
+          })),
+          totalAmount,
+          paymentStatus: "Completed",
+          orderStatus: "Confirmed",
+        });
+
+        localStorage.removeItem("cart");
+        sessionStorage.removeItem("cart");
+        sessionStorage.removeItem("userId");
+        sessionStorage.removeItem("totalAmount");
+        setCart([]);
+      } catch (err) {
+        console.error("Order finalization failed:", err);
+      }
+    };
+
+    completeOrder();
+  }, [navigate, setCart]);
+
   return (
-    <div className="max-w-lg mx-auto mt-10 p-6 bg-white shadow-lg rounded-xl text-center">
-      <FaCheckCircle className="text-green-500 text-6xl mx-auto mb-4" />
-      <h2 className="text-2xl font-bold text-navyBlue">
-        Order Placed Successfully!
-      </h2>
-      <p className="text-gray-700 mt-2">
-        Thank you for your purchase. Your tickets have been booked successfully.
-      </p>
-      <div className="mt-6">
-        <Link
-          to="/"
-          className="bg-navyBlue hover:bg-deepBlue text-white py-2 px-6 rounded-lg text-lg font-semibold"
-        >
-          Back to Home
-        </Link>
-      </div>
+    <div className="text-center mt-10">
+      <h1 className="text-3xl font-bold text-green-600">Order Successful!</h1>
+      <p>Your ticket has been confirmed. Check your account for details.</p>
     </div>
   );
 };

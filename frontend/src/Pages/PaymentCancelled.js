@@ -1,19 +1,25 @@
-import React from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const PaymentCancelled = () => {
+const PaymentCancelled = ({ setCart }) => {
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const storedCart = sessionStorage.getItem("cart");
+    if (storedCart) {
+      setCart(JSON.parse(storedCart));
+    }
+  }, [setCart]);
+
   return (
-    <div className="text-center mt-10">
-      <h1 className="text-2xl font-bold text-red-600">Payment Cancelled</h1>
-      <p className="mt-2 text-gray-700">
-        Your ticket order was not completed. You can return to the cart and try
-        again.
-      </p>
+    <div className="p-6 text-center">
+      <h2 className="text-2xl font-bold text-red-600 mb-4">
+        Payment Cancelled
+      </h2>
+      <p className="mb-4">Your payment was not completed.</p>
       <button
         onClick={() => navigate("/cart")}
-        className="mt-4 px-4 py-2 bg-navyBlue hover:bg-deepBlue text-white rounded"
+        className="bg-navyBlue hover:bg-deepBlue text-white px-4 py-2 rounded"
       >
         Back to Cart
       </button>

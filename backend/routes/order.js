@@ -144,42 +144,28 @@ router.get("/user-ticket-count/:userId/:eventId", async (req, res) => {
     const { userId, eventId } = req.params;
 
     const eventObjectId = new mongoose.Types.ObjectId(eventId);
-
     const orders = await Order.find({ userId });
 
-    if (!orders.length) {
-      console.log("No previous orders found for this user.");
-    }
-
     let totalTicketsBooked = 0;
-
     orders.forEach((order) => {
       order.tickets.forEach((ticket) => {
-        console.log(
-          `Checking ticket: ${ticket.ticketId} against event: ${eventId}`
-        );
-
         if (ticket.ticketId.equals(eventObjectId)) {
           totalTicketsBooked += ticket.quantity;
         }
       });
     });
 
-    console.log(`Total tickets booked: ${totalTicketsBooked}`);
     res.json({ totalTicketsBooked });
   } catch (error) {
-    console.error("Error checking ticket count:", error.message);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Get all orders placed by a user
 router.get("/user-orders/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
 
     const orders = await Order.find({ userId }).sort({ createdAt: -1 }).lean();
-
     if (!orders.length) return res.json([]);
 
     const eventInstanceIds = orders.flatMap((order) =>
@@ -208,6 +194,7 @@ router.get("/user-orders/:userId", async (req, res) => {
       instanceMap[inst._id.toString()] = {
         date: inst.instanceDate,
         eventId: inst.eventId.toString(),
+        location: inst.location || "N/A",
       };
     });
 
@@ -220,6 +207,7 @@ router.get("/user-orders/:userId", async (req, res) => {
           ...ticket,
           eventTitle: title,
           instanceDate: instance?.date || null,
+          location: instance?.location || "N/A",
         };
       }),
     }));

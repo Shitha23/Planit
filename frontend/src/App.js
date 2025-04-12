@@ -191,7 +191,10 @@ function App() {
             path="/sponsorship-cancelled"
             element={<SponsorshipCancelled />}
           />
-          <Route path="/payment-cancelled" element={<PaymentCancelled />} />
+          <Route
+            path="/payment-cancelled"
+            element={<PaymentCancelled setCart={setCart} />}
+          />
           <Route
             path="/checkout"
             element={<CheckoutPage cart={cart} setCart={setCart} />}

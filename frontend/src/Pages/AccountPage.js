@@ -6,7 +6,10 @@ import {
   EmailAuthProvider,
   reauthenticateWithCredential,
 } from "firebase/auth";
-import { FaFileInvoice } from "react-icons/fa";
+import { FaFileInvoice, FaTicketAlt } from "react-icons/fa";
+import { generateTicketPDF } from "../Components/generateTicketPDF";
+import jsPDF from "jspdf";
+import TicketViewer from "../Components/TicketViewer";
 import app from "../firebaseConfig";
 
 const getFriendlyErrorMessage = (errorCode) => {
@@ -38,6 +41,8 @@ const AccountPage = () => {
     role: "customer",
   });
   const [loading, setLoading] = useState(true);
+  const [ticketPreview, setTicketPreview] = useState(null);
+  const [ticketToDownload, setTicketToDownload] = useState(null);
   const [userQueries, setUserQueries] = useState([]);
   const [message, setMessage] = useState("");
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -104,6 +109,7 @@ const AccountPage = () => {
     const res = await fetch(`http://localhost:5001/api/user-orders/${uid}`);
     const data = await res.json();
     setOrders(data || []);
+    console.log("Orders:", data);
   };
 
   const fetchSponsorships = async (uid) => {
@@ -378,11 +384,32 @@ const AccountPage = () => {
                       <strong>Total Paid:</strong> ${t.orderAmount.toFixed(2)}
                     </p>
                     <button
-                      className="mt-2 px-4 py-1 bg-navyBlue text-white rounded-md hover:bg-deepBlue flex items-center gap-2"
-                      onClick={() => {}}
+                      className="px-4 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center gap-2"
+                      onClick={async () => {
+                        const blob = await generateTicketPDF({
+                          event: {
+                            title: t.eventTitle,
+                            instanceDate: t.instanceDate,
+                            location: t.location || "N/A",
+                          },
+                          quantity: t.quantity,
+                          price: t.price,
+                          orderDate: t.orderDate,
+                          ticketId: `TICKET-${i + 1}-${Date.now()
+                            .toString()
+                            .slice(-6)}`,
+                        });
+                        const blobUrl = URL.createObjectURL(blob);
+                        setTicketPreview(blobUrl);
+                        setTicketToDownload(() => () => {
+                          const doc = new jsPDF();
+                          doc.output("dataurlnewwindow");
+                          doc.save("PlanIt_Ticket.pdf");
+                        });
+                      }}
                     >
-                      <FaFileInvoice />
-                      View Invoice
+                      <FaTicketAlt />
+                      Preview Ticket
                     </button>
                   </div>
                 ))
@@ -530,6 +557,20 @@ const AccountPage = () => {
           ))
         )}
       </div>
+
+      {ticketPreview && (
+        <TicketViewer
+          previewUrl={ticketPreview}
+          onDownload={() => {
+            const link = document.createElement("a");
+            link.href = ticketPreview;
+            link.download = "PlanIt_Ticket.pdf";
+            link.click();
+            setTicketPreview(null);
+          }}
+          onClose={() => setTicketPreview(null)}
+        />
+      )}
     </div>
   );
 };

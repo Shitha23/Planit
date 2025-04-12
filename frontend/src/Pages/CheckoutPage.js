@@ -90,7 +90,12 @@ const CheckoutPage = ({ cart, setCart }) => {
         }
       } else if (paymentMethod === "card") {
         const stripe = await stripePromise;
-        const sessionRes = await axios.post(
+
+        sessionStorage.setItem("cart", JSON.stringify(cart));
+        sessionStorage.setItem("userId", uid);
+        sessionStorage.setItem("totalAmount", totalPrice.toString());
+
+        const res = await axios.post(
           "http://localhost:5001/api/create-stripe-session",
           {
             userId: uid,
@@ -106,7 +111,7 @@ const CheckoutPage = ({ cart, setCart }) => {
         );
 
         const result = await stripe.redirectToCheckout({
-          sessionId: sessionRes.data.id,
+          sessionId: res.data.id,
         });
 
         if (result.error) {

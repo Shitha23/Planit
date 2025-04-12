@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-const Order = require("../models/Order");
 const Event = require("../models/Event");
 const EventInstance = require("../models/EventInstance");
 const User = require("../models/User");
@@ -66,31 +65,10 @@ router.post("/create-stripe-session", async (req, res) => {
       cancel_url: `http://localhost:3000/payment-cancelled`,
     });
 
-    const order = new Order({
-      userId,
-      tickets: cart.map((item) => ({
-        eventInstanceId: item.eventInstanceId,
-        ticketId: item.ticketId,
-        quantity: item.quantity,
-        price: item.price,
-      })),
-      totalAmount,
-      paymentStatus: "Completed",
-      orderStatus: "Confirmed",
-    });
-
-    await order.save();
-
-    for (const ticket of cart) {
-      await EventInstance.findByIdAndUpdate(ticket.eventInstanceId, {
-        $inc: { ticketsSold: ticket.quantity },
-      });
-    }
-
     res.status(200).json({ id: session.id });
   } catch (error) {
-    console.error("Stripe session or order error:", error.message);
-    res.status(500).json({ error: "Stripe session or order creation failed" });
+    console.error("Stripe session creation error:", error.message);
+    res.status(500).json({ error: "Stripe session creation failed" });
   }
 });
 
