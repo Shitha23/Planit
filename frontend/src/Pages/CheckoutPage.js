@@ -89,6 +89,8 @@ const CheckoutPage = ({ cart, setCart }) => {
           navigate("/order-success");
         }
       } else if (paymentMethod === "card") {
+        sessionStorage.setItem("paymentMethod", "card");
+        sessionStorage.setItem("orderCompleted", "false");
         const stripe = await stripePromise;
 
         sessionStorage.setItem("cart", JSON.stringify(cart));

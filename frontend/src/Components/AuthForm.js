@@ -38,35 +38,48 @@ const AuthForm = ({ type, onClose, setSuccessMessage, setErrorMessage }) => {
   const validateForm = () => {
     const newErrors = {};
 
-    if (type === "signup") {
-      if (!formData.name.trim() || formData.name.length < 3) {
-        newErrors.name = "Name must be at least 3 characters long.";
-      }
-
-      if (!/^\d{10}$/.test(formData.phone)) {
-        newErrors.phone = "Phone number must be 10 digits.";
-      }
-
-      if (!formData.address.trim() || formData.address.length < 5) {
-        newErrors.address = "Address must be at least 5 characters long.";
-      }
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required.";
+    } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
+      newErrors.email = "Please enter a valid email address.";
     }
 
-    if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
-      newErrors.email = "Invalid email format.";
-    }
-
-    if (
+    if (!formData.password) {
+      newErrors.password = "Password is required.";
+    } else if (
+      type === "signup" &&
       !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
         formData.password
       )
     ) {
       newErrors.password =
-        "Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character.";
+        "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.";
     }
 
-    if (type === "signup" && formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match.";
+    if (type === "signup") {
+      if (!formData.name.trim()) {
+        newErrors.name = "Name is required.";
+      } else if (formData.name.length < 3) {
+        newErrors.name = "Name must be at least 3 characters long.";
+      }
+
+      if (!formData.phone.trim()) {
+        newErrors.phone = "Phone number is required.";
+      } else if (!/^\d{10}$/.test(formData.phone)) {
+        newErrors.phone = "Phone number must be exactly 10 digits.";
+      }
+
+      if (!formData.address.trim()) {
+        newErrors.address = "Address is required.";
+      } else if (formData.address.length < 5) {
+        newErrors.address = "Address must be at least 5 characters long.";
+      }
+
+      if (!formData.confirmPassword) {
+        newErrors.confirmPassword = "Please confirm your password.";
+      } else if (formData.password !== formData.confirmPassword) {
+        newErrors.confirmPassword = "Passwords do not match.";
+      }
     }
 
     setErrors(newErrors);
@@ -255,6 +268,10 @@ const AuthForm = ({ type, onClose, setSuccessMessage, setErrorMessage }) => {
             }
             required
           />
+          {errors.confirmPassword && (
+            <p className="text-red-500 text-sm">{errors.confirmPassword}</p>
+          )}
+
           <button
             type="button"
             className="absolute right-3 top-3 text-gray-600"

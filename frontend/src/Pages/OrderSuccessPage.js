@@ -7,6 +7,9 @@ const OrderSuccessPage = ({ setCart }) => {
 
   useEffect(() => {
     const completeOrder = async () => {
+      const alreadyProcessed = sessionStorage.getItem("orderCompleted");
+      if (alreadyProcessed === "true") return;
+
       const cart = JSON.parse(sessionStorage.getItem("cart"));
       const userId = sessionStorage.getItem("userId");
       const totalAmount = parseFloat(sessionStorage.getItem("totalAmount"));
@@ -17,6 +20,8 @@ const OrderSuccessPage = ({ setCart }) => {
       }
 
       try {
+        sessionStorage.setItem("orderCompleted", "true");
+        console.log("Order completed successfully");
         await axios.post("http://localhost:5001/api/order", {
           userId,
           tickets: cart.map((item) => ({
@@ -34,9 +39,10 @@ const OrderSuccessPage = ({ setCart }) => {
         sessionStorage.removeItem("cart");
         sessionStorage.removeItem("userId");
         sessionStorage.removeItem("totalAmount");
-        setCart([]);
+
+        if (typeof setCart === "function") setCart([]);
       } catch (err) {
-        console.error("Order finalization failed:", err);
+        sessionStorage.removeItem("orderCompleted");
       }
     };
 
