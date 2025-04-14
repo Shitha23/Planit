@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from "../axiosConfig";
 
 const SponsorshipSuccess = () => {
   const [params] = useSearchParams();
@@ -19,7 +19,7 @@ const SponsorshipSuccess = () => {
       if (!sponsorId || !eventId || !amount) return;
 
       try {
-        await axios.post("http://localhost:5001/api/sponsorships", {
+        await axios.post("/api/sponsorships", {
           sponsorId,
           eventId,
           amount,

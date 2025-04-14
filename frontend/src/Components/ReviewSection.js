@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../axiosConfig";
+
 import { FaStar } from "react-icons/fa";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
@@ -12,7 +13,7 @@ const ReviewSection = () => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const response = await axios.get("http://localhost:5001/api/reviews");
+        const response = await axios.get("/api/reviews");
         setReviews(response.data);
       } catch (error) {
         console.error("Error fetching reviews:", error);
@@ -55,10 +56,7 @@ const ReviewSection = () => {
     };
 
     try {
-      const response = await axios.post(
-        "http://localhost:5001/api/reviews",
-        reviewData
-      );
+      const response = await axios.post("/api/reviews", reviewData);
       setReviews([...reviews, response.data]);
       setFormData({ ...formData, name: "", rating: 0, review: "" });
       setAlert({ message: "Review submitted successfully!", type: "success" });

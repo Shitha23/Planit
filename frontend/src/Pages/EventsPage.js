@@ -46,9 +46,7 @@ const EventsPage = () => {
 
   const fetchEvents = async (userId) => {
     try {
-      const response = await fetch(
-        `http://localhost:5001/api/events?organizerId=${userId}`
-      );
+      const response = await fetch(`/api/events?organizerId=${userId}`);
       if (!response.ok) throw new Error("Failed to fetch events");
       const data = await response.json();
       setEvents(data);
@@ -130,7 +128,7 @@ const EventsPage = () => {
   const handleSubmit = async () => {
     if (!user) return;
     try {
-      const response = await fetch("http://localhost:5001/api/event", {
+      const response = await fetch("/api/event", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...eventData, organizerId: user.uid }),

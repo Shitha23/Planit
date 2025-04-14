@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../axiosConfig";
+
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
@@ -26,9 +27,7 @@ const OrganizerQueriesPage = () => {
   const fetchOrganizerEvents = async (id) => {
     try {
       if (!id) return;
-      const response = await axios.get(
-        `http://localhost:5001/api/organizer-events/${id}`
-      );
+      const response = await axios.get(`/api/organizer-events/${id}`);
       setEvents(response.data);
     } catch (error) {
       console.error("Error fetching organizer events:", error);

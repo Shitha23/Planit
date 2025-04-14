@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FaTicketAlt, FaUsers, FaHandshake } from "react-icons/fa";
-import axios from "axios";
+import axios from "../axiosConfig";
+
 import { Helmet } from "react-helmet";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import ReviewSection from "../Components/ReviewSection";
@@ -28,7 +29,7 @@ const Home = () => {
   useEffect(() => {
     const fetchUpcomingEvents = async () => {
       try {
-        const response = await axios.get("http://localhost:5001/api/upcoming");
+        const response = await axios.get("/api/upcoming");
         setEvents(response.data);
       } catch (error) {
         console.error("Error fetching upcoming events:", error);
@@ -61,9 +62,7 @@ const Home = () => {
         const firebaseId = localStorage.getItem("firebaseId");
         if (!firebaseId) return;
 
-        const response = await axios.get(
-          `http://localhost:5001/api/auth/user/${firebaseId}`
-        );
+        const response = await axios.get(`/api/auth/user/${firebaseId}`);
         if (response.data) {
           setFormData({
             name: response.data.name || "",
@@ -106,10 +105,7 @@ const Home = () => {
     };
 
     try {
-      const response = await axios.post(
-        "http://localhost:5001/api/organizer-request",
-        requestData
-      );
+      const response = await axios.post("/api/organizer-request", requestData);
       setAlert({ message: response.data.message, type: "success" });
       setTimeout(() => setAlert({ message: "", type: "" }), 5000);
       setShowModal(false);

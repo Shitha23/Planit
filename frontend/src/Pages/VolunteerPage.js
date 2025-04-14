@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "../axiosConfig";
 
 const VolunteerPage = ({ userId }) => {
   const [events, setEvents] = useState([]);
@@ -15,22 +15,18 @@ const VolunteerPage = ({ userId }) => {
   useEffect(() => {
     if (!userId) return;
 
-    axios
-      .get("http://localhost:5001/api/events/need-volunteers")
-      .then((res) => setEvents(res.data));
+    axios.get("/api/events/need-volunteers").then((res) => setEvents(res.data));
+
+    axios.get(`/api/volunteers/user/${userId}`).then((res) => {
+      const status = res.data.reduce((acc, vol) => {
+        acc[vol.eventId._id || vol.eventId] = vol.accessLevel;
+        return acc;
+      }, {});
+      setVolunteerStatus(status);
+    });
 
     axios
-      .get(`http://localhost:5001/api/volunteers/user/${userId}`)
-      .then((res) => {
-        const status = res.data.reduce((acc, vol) => {
-          acc[vol.eventId._id || vol.eventId] = vol.accessLevel;
-          return acc;
-        }, {});
-        setVolunteerStatus(status);
-      });
-
-    axios
-      .get(`http://localhost:5001/api/auth/user/${userId}`)
+      .get(`/api/auth/user/${userId}`)
       .then((res) => setUserDetails(res.data));
   }, [userId]);
 
@@ -42,10 +38,7 @@ const VolunteerPage = ({ userId }) => {
         reason: reason,
       };
 
-      await axios.post(
-        "http://localhost:5001/api/volunteers/register",
-        payload
-      );
+      await axios.post("/api/volunteers/register", payload);
 
       setVolunteerStatus((prev) => ({
         ...prev,

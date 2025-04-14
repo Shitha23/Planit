@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from "../axiosConfig";
 
 const OrderSuccessPage = ({ setCart }) => {
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ const OrderSuccessPage = ({ setCart }) => {
       try {
         sessionStorage.setItem("orderCompleted", "true");
         console.log("Order completed successfully");
-        await axios.post("http://localhost:5001/api/order", {
+        await axios.post("/api/order", {
           userId,
           tickets: cart.map((item) => ({
             eventInstanceId: item.eventInstanceId,

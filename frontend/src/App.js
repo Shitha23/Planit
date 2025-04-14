@@ -73,9 +73,7 @@ function App() {
           setUserRole(storedRole);
         } else {
           try {
-            const response = await fetch(
-              `http://localhost:5001/api/auth/user/${currentUser.uid}`
-            );
+            const response = await fetch(`/api/auth/user/${currentUser.uid}`);
             const data = await response.json();
             setUserRole(data.role);
             localStorage.setItem("userRole", data.role);

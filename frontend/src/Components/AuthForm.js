@@ -1,5 +1,6 @@
 import { useState } from "react";
-import axios from "axios";
+import axios from "../axiosConfig";
+
 import {
   getAuth,
   createUserWithEmailAndPassword,
@@ -107,7 +108,7 @@ const AuthForm = ({ type, onClose, setSuccessMessage, setErrorMessage }) => {
         });
 
         const firebaseId = user.uid;
-        await axios.post("http://localhost:5001/api/auth/signup", {
+        await axios.post("/api/auth/signup", {
           ...formData,
           firebaseId,
         });
@@ -126,9 +127,7 @@ const AuthForm = ({ type, onClose, setSuccessMessage, setErrorMessage }) => {
         );
         const user = userCredential.user;
 
-        const response = await axios.get(
-          `http://localhost:5001/api/auth/user/${user.uid}`
-        );
+        const response = await axios.get(`/api/auth/user/${user.uid}`);
 
         if (response.data && response.data.name) {
           localStorage.setItem("userName", response.data.name);
@@ -152,11 +151,11 @@ const AuthForm = ({ type, onClose, setSuccessMessage, setErrorMessage }) => {
       const { uid, displayName, email } = user;
 
       let existingUser = await axios
-        .get(`http://localhost:5001/api/auth/user/${uid}`)
+        .get(`/api/auth/user/${uid}`)
         .catch(() => ({}));
 
       if (!existingUser?.data) {
-        await axios.post("http://localhost:5001/api/auth/signup", {
+        await axios.post("/api/auth/signup", {
           firebaseId: uid,
           name: displayName || "Google User",
           email,

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import NotificationIcon from "./NotificationIcon";
 import { Link } from "react-router-dom";
+import axios from "../axiosConfig";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import {
   FaShoppingCart,
@@ -41,11 +42,9 @@ const Header = ({ onOpenLogin, onOpenSignup, cart = [] }) => {
           setUserRole(storedRole);
         } else {
           try {
-            const response = await fetch(
-              `http://localhost:5001/api/auth/user/${currentUser.uid}`
-            );
-            if (!response.ok) throw new Error("Failed to fetch role");
-            const data = await response.json();
+            const response = await axios.get(`/auth/user/${currentUser.uid}`);
+            const data = response.data;
+
             setUserRole(data.role);
             localStorage.setItem("userRole", data.role);
           } catch (error) {
@@ -67,11 +66,9 @@ const Header = ({ onOpenLogin, onOpenSignup, cart = [] }) => {
 
   const fetchMongoUserId = async (firebaseUid) => {
     try {
-      const response = await fetch(
-        `http://localhost:5001/api/users/mongo-id/${firebaseUid}`
-      );
-      if (!response.ok) throw new Error("Failed to fetch MongoDB user ID");
-      const data = await response.json();
+      const response = await axios.get(`/api/users/mongo-id/${firebaseUid}`);
+      const data = response.data;
+
       setMongoUserId(data.mongoId);
     } catch (error) {
       console.error("Error fetching MongoDB User ID:", error);

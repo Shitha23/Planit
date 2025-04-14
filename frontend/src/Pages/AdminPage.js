@@ -16,7 +16,7 @@ const AdminPage = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:5001/api/admin/users");
+      const response = await fetch("/api/admin/users");
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -39,17 +39,14 @@ const AdminPage = () => {
   const updateRole = async (email) => {
     try {
       const token = await auth.currentUser.getIdToken();
-      const response = await fetch(
-        "http://localhost:5001/api/admin/update-role",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ email, newRole: selectedRoles[email] }),
-        }
-      );
+      const response = await fetch("/api/admin/update-role", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ email, newRole: selectedRoles[email] }),
+      });
 
       const data = await response.json();
 

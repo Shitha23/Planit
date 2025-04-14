@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../axiosConfig";
 
 const EventQueryForm = ({ eventId }) => {
   const [query, setQuery] = useState("");
@@ -16,9 +16,7 @@ const EventQueryForm = ({ eventId }) => {
 
   const fetchUserDetails = async (firebaseId) => {
     try {
-      const response = await axios.get(
-        `http://localhost:5001/api/auth/user/${firebaseId}`
-      );
+      const response = await axios.get(`/api/auth/user/${firebaseId}`);
       setEmail(response.data.email || "");
     } catch (error) {
       console.error("Error fetching user details:", error);
@@ -32,14 +30,11 @@ const EventQueryForm = ({ eventId }) => {
     setErrorMessage(null);
 
     try {
-      const response = await axios.post(
-        "http://localhost:5001/api/event-queries",
-        {
-          eventId,
-          email,
-          query,
-        }
-      );
+      const response = await axios.post("/api/event-queries", {
+        eventId,
+        email,
+        query,
+      });
 
       if (response.status !== 201) throw new Error("Failed to submit query");
 

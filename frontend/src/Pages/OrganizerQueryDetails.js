@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../axiosConfig";
+
 import { useParams, useNavigate } from "react-router-dom";
 
 const OrganizerQueryDetails = () => {
@@ -23,9 +24,7 @@ const OrganizerQueryDetails = () => {
 
   const fetchEventDetails = async (eventId) => {
     try {
-      const response = await axios.get(
-        `http://localhost:5001/api/event/${eventId}`
-      );
+      const response = await axios.get(`/api/event/${eventId}`);
       setEventTitle(response.data.title);
     } catch (error) {
       console.error("Error fetching event details:", error);
@@ -36,9 +35,7 @@ const OrganizerQueryDetails = () => {
   const fetchEventQueries = async (eventId) => {
     setLoading(true);
     try {
-      const response = await axios.get(
-        `http://localhost:5001/api/event-queries/${eventId}`
-      );
+      const response = await axios.get(`/api/event-queries/${eventId}`);
       setQueries(response.data);
     } catch (error) {
       console.error("Error fetching event queries:", error);
@@ -152,10 +149,9 @@ const OrganizerQueryDetails = () => {
                 onClick={async () => {
                   setSubmitting(true);
                   try {
-                    await axios.put(
-                      `http://localhost:5001/api/reply/${replyModal.queryId}`,
-                      { reply: replyText }
-                    );
+                    await axios.put(`/api/reply/${replyModal.queryId}`, {
+                      reply: replyText,
+                    });
                     setReplyModal({ open: false, queryId: null });
                     setReplyText("");
                     fetchEventQueries(eventId);
