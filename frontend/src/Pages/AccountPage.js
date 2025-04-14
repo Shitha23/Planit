@@ -78,9 +78,7 @@ const AccountPage = () => {
 
   const fetchUserData = async (firebaseId) => {
     try {
-      const response = await fetch(
-        `http://localhost:5001/api/users/${firebaseId}`
-      );
+      const response = await fetch(`/api/users/${firebaseId}`);
       const data = await response.json();
       setUserData({
         name: data.name || "",
@@ -97,7 +95,7 @@ const AccountPage = () => {
 
   const fetchUserQueries = async (uid) => {
     try {
-      const res = await fetch(`http://localhost:5001/api/user-queries/${uid}`);
+      const res = await fetch(`/api/user-queries/${uid}`);
       const data = await res.json();
       setUserQueries(data || []);
     } catch (err) {
@@ -106,21 +104,21 @@ const AccountPage = () => {
   };
 
   const fetchOrders = async (uid) => {
-    const res = await fetch(`http://localhost:5001/api/user-orders/${uid}`);
+    const res = await fetch(`/api/user-orders/${uid}`);
     const data = await res.json();
     setOrders(data || []);
     console.log("Orders:", data);
   };
 
   const fetchSponsorships = async (uid) => {
-    const res = await fetch(`http://localhost:5001/api/sponsorships/${uid}`);
+    const res = await fetch(`/api/sponsorships/${uid}`);
     const data = await res.json();
     const filtered = data.filter((s) => s.sponsorId === uid);
     setSponsorships(filtered || []);
   };
 
   const fetchVolunteerEvents = async (uid) => {
-    const res = await fetch(`http://localhost:5001/api/volunteers/user/${uid}`);
+    const res = await fetch(`/api/volunteers/user/${uid}`);
     const data = await res.json();
     setVolunteerEvents(data || []);
   };
@@ -133,7 +131,7 @@ const AccountPage = () => {
     e.preventDefault();
     if (!user) return;
     try {
-      const res = await fetch(`http://localhost:5001/api/users/${user.uid}`, {
+      const res = await fetch(`/api/users/${user.uid}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userData),

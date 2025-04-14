@@ -10,7 +10,7 @@ const EventDetailsPage = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
-    fetch(`http://localhost:5001/api/event/${id}`)
+    fetch(`/api/event/${id}`)
       .then((res) => res.json())
       .then((data) => {
         setEvent(data);
@@ -33,7 +33,7 @@ const EventDetailsPage = () => {
 
   const handleDelete = async () => {
     try {
-      const response = await fetch(`http://localhost:5001/api/event/${id}`, {
+      const response = await fetch(`/api/event/${id}`, {
         method: "DELETE",
       });
 
@@ -53,7 +53,7 @@ const EventDetailsPage = () => {
 
   const handleUpdate = async () => {
     try {
-      const response = await fetch(`http://localhost:5001/api/event/${id}`, {
+      const response = await fetch(`/api/event/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

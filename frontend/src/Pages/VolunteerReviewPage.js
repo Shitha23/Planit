@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "../axiosConfig";
 import { UserIcon, MailIcon, PhoneIcon } from "lucide-react";
 
 const VolunteerReviewPage = ({ organizerId }) => {
@@ -12,16 +12,12 @@ const VolunteerReviewPage = ({ organizerId }) => {
 
   const fetchEventsAndVolunteers = async () => {
     try {
-      const res = await axios.get(
-        `http://localhost:5001/api/organizer/${organizerId}`
-      );
+      const res = await axios.get(`/api/organizer/${organizerId}`);
       const eventsData = res.data;
 
       const eventsWithVolunteers = await Promise.all(
         eventsData.map(async (event) => {
-          const volRes = await axios.get(
-            `http://localhost:5001/api/volunteers/event/${event._id}`
-          );
+          const volRes = await axios.get(`/api/volunteers/event/${event._id}`);
           return { ...event, volunteers: volRes.data };
         })
       );
@@ -36,7 +32,7 @@ const VolunteerReviewPage = ({ organizerId }) => {
 
   const handleAction = async (volunteerId, action) => {
     try {
-      await axios.put(`http://localhost:5001/api/volunteers/${action}`, {
+      await axios.put(`/api/volunteers/${action}`, {
         volunteerId,
       });
       fetchEventsAndVolunteers();

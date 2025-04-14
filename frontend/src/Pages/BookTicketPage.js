@@ -6,6 +6,7 @@ import {
   FaRedo,
   FaShoppingCart,
 } from "react-icons/fa";
+import axios from "../axiosConfig";
 
 const BookTicketPage = ({ cart, setCart }) => {
   const [events, setEvents] = useState([]);
@@ -15,9 +16,9 @@ const BookTicketPage = ({ cart, setCart }) => {
   const [alert, setAlert] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:5001/api/ticketevents")
-      .then((res) => res.json())
-      .then((data) => setEvents(data))
+    axios
+      .get("/api/ticketevents")
+      .then((res) => setEvents(res.data))
       .catch((err) => console.error("Error fetching events:", err));
   }, []);
 

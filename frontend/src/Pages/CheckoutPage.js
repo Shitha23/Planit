@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from "../axiosConfig";
+
 import { loadStripe } from "@stripe/stripe-js";
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
@@ -22,7 +23,7 @@ const CheckoutPage = ({ cart, setCart }) => {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:5001/api/auth/user/${uid}`)
+      .get(`/api/auth/user/${uid}`)
       .then((res) => {
         if (res.status === 200) {
           setUserData((prev) => ({ ...prev, ...res.data }));
@@ -53,7 +54,7 @@ const CheckoutPage = ({ cart, setCart }) => {
 
       for (const item of cart) {
         const res = await axios.get(
-          `http://localhost:5001/api/user-ticket-count/${uid}/${item._id}`
+          `/api/user-ticket-count/${uid}/${item._id}`
         );
         const totalBooked = res.data.totalTicketsBooked;
         if (totalBooked + item.quantity > 2) {
@@ -78,10 +79,7 @@ const CheckoutPage = ({ cart, setCart }) => {
           orderStatus: "COD Requested",
         };
 
-        const res = await axios.post(
-          "http://localhost:5001/api/order",
-          orderData
-        );
+        const res = await axios.post("/api/order", orderData);
 
         if (res.status === 201) {
           localStorage.removeItem("cart");
@@ -97,20 +95,17 @@ const CheckoutPage = ({ cart, setCart }) => {
         sessionStorage.setItem("userId", uid);
         sessionStorage.setItem("totalAmount", totalPrice.toString());
 
-        const res = await axios.post(
-          "http://localhost:5001/api/create-stripe-session",
-          {
-            userId: uid,
-            cart: cart.map((item) => ({
-              name: item.title,
-              quantity: item.quantity,
-              price: item.ticketPrice,
-              eventInstanceId: item.eventInstanceId,
-              ticketId: item._id,
-            })),
-            totalAmount: totalPrice,
-          }
-        );
+        const res = await axios.post("/api/create-stripe-session", {
+          userId: uid,
+          cart: cart.map((item) => ({
+            name: item.title,
+            quantity: item.quantity,
+            price: item.ticketPrice,
+            eventInstanceId: item.eventInstanceId,
+            ticketId: item._id,
+          })),
+          totalAmount: totalPrice,
+        });
 
         const result = await stripe.redirectToCheckout({
           sessionId: res.data.id,

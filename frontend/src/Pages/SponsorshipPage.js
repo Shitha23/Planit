@@ -12,9 +12,7 @@ const SponsorshipPage = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:5001/api/events/needsponsorship"
-        );
+        const response = await fetch("/api/events/needsponsorship");
         const data = await response.json();
         const now = new Date();
 
@@ -57,14 +55,11 @@ const SponsorshipPage = () => {
     try {
       const stripe = await stripePromise;
 
-      const res = await fetch(
-        "http://localhost:5001/api/create-sponsorship-session",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sponsorId, eventId, amount }),
-        }
-      );
+      const res = await fetch("/api/create-sponsorship-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sponsorId, eventId, amount }),
+      });
 
       const data = await res.json();
       if (!res.ok) {

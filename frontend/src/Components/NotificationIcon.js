@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { FaBell, FaTimes } from "react-icons/fa";
-import axios from "axios";
+import axios from "../axiosConfig";
 
 const NotificationIcon = ({ userId }) => {
   const [notifications, setNotifications] = useState([]);
@@ -17,12 +17,9 @@ const NotificationIcon = ({ userId }) => {
 
   const fetchNotifications = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:5001/api/notifications",
-        {
-          headers: { "user-id": userId },
-        }
-      );
+      const response = await axios.get("/api/notifications", {
+        headers: { "user-id": userId },
+      });
       if (response.data) {
         setNotifications(response.data);
         setUnreadCount(response.data.filter((n) => !n.read).length);
@@ -35,7 +32,7 @@ const NotificationIcon = ({ userId }) => {
   const markAllAsRead = async () => {
     try {
       await axios.put(
-        "http://localhost:5001/api/notifications/mark-read",
+        "/api/notifications/mark-read",
         {},
         {
           headers: { "user-id": userId },
