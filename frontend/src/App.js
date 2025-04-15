@@ -34,6 +34,7 @@ import PaymentCancelled from "./Pages/PaymentCancelled";
 import AdminOrganizerRequests from "./Pages/AdminOrganizerRequests";
 import VolunteerReviewPage from "./Pages/VolunteerReviewPage";
 import SponsorshipSuccess from "./Pages/SponsorshipSuccess";
+import axios from "../axiosConfig";
 
 const PrivateRoute = ({ requiredRole, userRole }) => {
   if (!userRole || userRole !== requiredRole) {
