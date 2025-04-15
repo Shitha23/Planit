@@ -10,6 +10,7 @@ const OrderSuccessPage = ({ setCart }) => {
       const alreadyProcessed = sessionStorage.getItem("orderCompleted");
       if (alreadyProcessed === "true") {
         if (typeof setCart === "function") setCart([]);
+        localStorage.removeItem("cart");
         return;
       }
 
@@ -24,8 +25,6 @@ const OrderSuccessPage = ({ setCart }) => {
 
       try {
         sessionStorage.setItem("orderCompleted", "true");
-        if (typeof setCart === "function") setCart([]);
-
         console.log("Order completed successfully");
         await axios.post("/api/order", {
           userId,
@@ -39,13 +38,15 @@ const OrderSuccessPage = ({ setCart }) => {
           paymentStatus: "Completed",
           orderStatus: "Confirmed",
         });
-
+      } catch (err) {
+        console.error("Order submission failed:", err);
+        sessionStorage.removeItem("orderCompleted");
+      } finally {
+        if (typeof setCart === "function") setCart([]);
         localStorage.removeItem("cart");
         sessionStorage.removeItem("cart");
         sessionStorage.removeItem("userId");
         sessionStorage.removeItem("totalAmount");
-      } catch (err) {
-        sessionStorage.removeItem("orderCompleted");
       }
     };
 
