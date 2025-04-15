@@ -25,8 +25,10 @@ const stripeSponsorship = require("./routes/stripeSponsorship");
 
 const app = express();
 
+app.use(cors({ origin: "*" }));
+
 if (process.env.NODE_ENV !== "production") {
-  app.use(cors({ origin: "http://localhost:3000" }));
+  app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 }
 
 app.use(express.json());
