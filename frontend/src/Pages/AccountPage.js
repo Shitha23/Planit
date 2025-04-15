@@ -76,12 +76,10 @@ const AccountPage = () => {
     });
     return () => unsubscribe();
   }, []);
-
   const fetchUserData = async (firebaseId) => {
     try {
       const response = await axios.get(`/api/users/${firebaseId}`);
-
-      const data = await response.json();
+      const data = response.data;
       setUserData({
         name: data.name || "",
         phone: data.phone || "",
@@ -98,35 +96,39 @@ const AccountPage = () => {
   const fetchUserQueries = async (uid) => {
     try {
       const res = await axios.get(`/api/user-queries/${uid}`);
-
-      const data = await res.json();
-      setUserQueries(data || []);
+      setUserQueries(res.data || []);
     } catch (err) {
       console.error("Error fetching user queries:", err);
     }
   };
 
   const fetchOrders = async (uid) => {
-    const res = await axios.get(`/api/user-orders/${uid}`);
-
-    const data = await res.json();
-    setOrders(data || []);
-    console.log("Orders:", data);
+    try {
+      const res = await axios.get(`/api/user-orders/${uid}`);
+      setOrders(res.data || []);
+      console.log("Orders:", res.data);
+    } catch (err) {
+      console.error("Error fetching orders:", err);
+    }
   };
 
   const fetchSponsorships = async (uid) => {
-    const res = await axios.get(`/api/sponsorships/${uid}`);
-
-    const data = await res.json();
-    const filtered = data.filter((s) => s.sponsorId === uid);
-    setSponsorships(filtered || []);
+    try {
+      const res = await axios.get(`/api/sponsorships/${uid}`);
+      const filtered = res.data.filter((s) => s.sponsorId === uid);
+      setSponsorships(filtered || []);
+    } catch (err) {
+      console.error("Error fetching sponsorships:", err);
+    }
   };
 
   const fetchVolunteerEvents = async (uid) => {
-    const res = await axios.get(`/api/volunteers/user/${uid}`);
-
-    const data = await res.json();
-    setVolunteerEvents(data || []);
+    try {
+      const res = await axios.get(`/api/volunteers/user/${uid}`);
+      setVolunteerEvents(res.data || []);
+    } catch (error) {
+      console.error("Error fetching volunteer events:", error);
+    }
   };
 
   const handleChange = (e) => {
