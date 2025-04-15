@@ -20,14 +20,7 @@ const Footer = ({ onOpenLogin, onOpenSignup }) => {
     e.preventDefault();
 
     try {
-      const response = await fetch(
-        "http://localhost:5001/api/newsletter/subscribe",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        }
-      );
+      const response = await axios.post("/api/newsletter/subscribe", { email });
 
       const data = await response.json();
       if (response.ok) {
@@ -142,4 +135,3 @@ const Footer = ({ onOpenLogin, onOpenSignup }) => {
 };
 
 export default Footer;
-

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { Link } from "react-router-dom";
+import axios from "../axiosConfig";
 
 const EventsPage = () => {
   const [events, setEvents] = useState([]);
@@ -46,7 +47,9 @@ const EventsPage = () => {
 
   const fetchEvents = async (userId) => {
     try {
-      const response = await fetch(`/api/events?organizerId=${userId}`);
+      const response = await axios.get(`/api/events`, {
+        params: { organizerId: userId },
+      });
       if (!response.ok) throw new Error("Failed to fetch events");
       const data = await response.json();
       setEvents(data);
@@ -128,10 +131,9 @@ const EventsPage = () => {
   const handleSubmit = async () => {
     if (!user) return;
     try {
-      const response = await fetch("/api/event", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...eventData, organizerId: user.uid }),
+      const response = await axios.post("/api/event", {
+        ...eventData,
+        organizerId: user.uid,
       });
 
       if (!response.ok) throw new Error("Failed to create event");

@@ -11,6 +11,7 @@ import { generateTicketPDF } from "../Components/generateTicketPDF";
 import jsPDF from "jspdf";
 import TicketViewer from "../Components/TicketViewer";
 import app from "../firebaseConfig";
+import axios from "../axiosConfig";
 
 const getFriendlyErrorMessage = (errorCode) => {
   const errorMessages = {
@@ -78,7 +79,8 @@ const AccountPage = () => {
 
   const fetchUserData = async (firebaseId) => {
     try {
-      const response = await fetch(`/api/users/${firebaseId}`);
+      const response = await axios.get(`/api/users/${firebaseId}`);
+
       const data = await response.json();
       setUserData({
         name: data.name || "",
@@ -95,7 +97,8 @@ const AccountPage = () => {
 
   const fetchUserQueries = async (uid) => {
     try {
-      const res = await fetch(`/api/user-queries/${uid}`);
+      const res = await axios.get(`/api/user-queries/${uid}`);
+
       const data = await res.json();
       setUserQueries(data || []);
     } catch (err) {
@@ -104,21 +107,24 @@ const AccountPage = () => {
   };
 
   const fetchOrders = async (uid) => {
-    const res = await fetch(`/api/user-orders/${uid}`);
+    const res = await axios.get(`/api/user-orders/${uid}`);
+
     const data = await res.json();
     setOrders(data || []);
     console.log("Orders:", data);
   };
 
   const fetchSponsorships = async (uid) => {
-    const res = await fetch(`/api/sponsorships/${uid}`);
+    const res = await axios.get(`/api/sponsorships/${uid}`);
+
     const data = await res.json();
     const filtered = data.filter((s) => s.sponsorId === uid);
     setSponsorships(filtered || []);
   };
 
   const fetchVolunteerEvents = async (uid) => {
-    const res = await fetch(`/api/volunteers/user/${uid}`);
+    const res = await axios.get(`/api/volunteers/user/${uid}`);
+
     const data = await res.json();
     setVolunteerEvents(data || []);
   };
@@ -131,11 +137,8 @@ const AccountPage = () => {
     e.preventDefault();
     if (!user) return;
     try {
-      const res = await fetch(`/api/users/${user.uid}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userData),
-      });
+      const res = await axios.put(`/api/users/${user.uid}`, userData);
+
       if (!res.ok) throw new Error("Update failed");
       setMessage("Profile updated successfully!");
     } catch {
