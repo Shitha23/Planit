@@ -200,7 +200,10 @@ function App() {
             path="/checkout"
             element={<CheckoutPage cart={cart} setCart={setCart} />}
           />
-          <Route path="/order-success" element={<OrderSuccessPage />} />
+          <Route
+            path="/order-success"
+            element={<OrderSuccessPage setCart={setCart} />}
+          />
           <Route
             path="/volunteer-event"
             element={<VolunteerPage userId={user?.uid} />}
