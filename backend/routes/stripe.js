@@ -61,8 +61,8 @@ router.post("/create-stripe-session", async (req, res) => {
       payment_method_types: ["card"],
       mode: "payment",
       line_items,
-      success_url: `http://localhost:3000/order-success?payment=success`,
-      cancel_url: `http://localhost:3000/payment-cancelled`,
+      success_url: `https://planiteventmanagement.netlify.app/order-success?payment=success`,
+      cancel_url: `https://planiteventmanagement.netlify.app/payment-cancelled`,
     });
 
     res.status(200).json({ id: session.id });
