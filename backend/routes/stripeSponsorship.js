@@ -27,8 +27,8 @@ router.post("/create-sponsorship-session", async (req, res) => {
           quantity: 1,
         },
       ],
-      success_url: `http://localhost:3000/sponsorship-success?eventId=${eventId}&sponsorId=${sponsorId}&amount=${amount}`,
-      cancel_url: `http://localhost:3000/sponsorship-cancelled`,
+      success_url: `https://planiteventmanagement.netlify.app/sponsorship-success?eventId=${eventId}&sponsorId=${sponsorId}&amount=${amount}`,
+      cancel_url: `https://planiteventmanagement.netlify.app/sponsorship-cancelled`,
     });
 
     res.json({ id: session.id });
