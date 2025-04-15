@@ -19,22 +19,23 @@ const TicketAnalysisDashboard = () => {
     const response = await axios.get(`/api/sales-summary`, {
       params: { organizerId },
     });
-    const data = await response.json();
-    setSalesSummary(data);
+    setSalesSummary(response.data);
   };
 
   const fetchOrders = async () => {
     const organizerId = localStorage.getItem("firebaseId");
-    const response = await fetch(`/api/orders?organizerId=${organizerId}`);
-    const data = await response.json();
-    setOrders(data);
+    const response = await axios.get(`/api/orders`, {
+      params: { organizerId },
+    });
+    setOrders(response.data);
   };
 
   const fetchSalesTimeline = async () => {
     const organizerId = localStorage.getItem("firebaseId");
-    const response = await fetch(`/api/timeline?organizerId=${organizerId}`);
-    const data = await response.json();
-    setSalesTimeline(data);
+    const response = await axios.get(`/api/timeline`, {
+      params: { organizerId },
+    });
+    setSalesTimeline(response.data);
   };
 
   return (
