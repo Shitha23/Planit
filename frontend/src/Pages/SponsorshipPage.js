@@ -62,8 +62,8 @@ const SponsorshipPage = () => {
         amount,
       });
 
-      const data = await res.json();
-      if (!res.ok) {
+      const data = res.data;
+      if (res.status !== 200) {
         triggerAlert(data?.error || "Server error.");
         return;
       }
@@ -72,7 +72,7 @@ const SponsorshipPage = () => {
       if (result.error) triggerAlert(result.error.message);
     } catch (error) {
       console.error("Stripe checkout error:", error);
-      triggerAlert("Stripe checkout failed.");
+      triggerAlert(error.response?.data?.error || "Stripe checkout failed.");
     }
   };
 

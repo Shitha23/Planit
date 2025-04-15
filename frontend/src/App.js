@@ -77,7 +77,7 @@ function App() {
             const response = await axios.get(
               `/api/auth/user/${currentUser.uid}`
             );
-            const data = await response.json();
+            const data = response.data;
             setUserRole(data.role);
             localStorage.setItem("userRole", data.role);
           } catch (error) {

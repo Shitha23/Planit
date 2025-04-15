@@ -8,7 +8,10 @@ const OrderSuccessPage = ({ setCart }) => {
   useEffect(() => {
     const completeOrder = async () => {
       const alreadyProcessed = sessionStorage.getItem("orderCompleted");
-      if (alreadyProcessed === "true") return;
+      if (alreadyProcessed === "true") {
+        if (typeof setCart === "function") setCart([]);
+        return;
+      }
 
       const cart = JSON.parse(sessionStorage.getItem("cart"));
       const userId = sessionStorage.getItem("userId");
