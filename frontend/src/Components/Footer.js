@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { FaFacebookF, FaInstagram, FaTwitter } from "react-icons/fa";
+import axios from "../axiosConfig";
 
 const Footer = ({ onOpenLogin, onOpenSignup }) => {
   const [user, setUser] = useState(null);
