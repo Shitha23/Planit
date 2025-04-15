@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Line } from "react-chartjs-2";
 import "chart.js/auto";
+import axios from "../axiosConfig";
 
 const TicketAnalysisDashboard = () => {
   const [salesSummary, setSalesSummary] = useState(null);
@@ -15,9 +16,9 @@ const TicketAnalysisDashboard = () => {
 
   const fetchSalesSummary = async () => {
     const organizerId = localStorage.getItem("firebaseId");
-    const response = await fetch(
-      `/api/sales-summary?organizerId=${organizerId}`
-    );
+    const response = await axios.get(`/api/sales-summary`, {
+      params: { organizerId },
+    });
     const data = await response.json();
     setSalesSummary(data);
   };

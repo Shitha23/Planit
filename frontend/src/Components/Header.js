@@ -42,7 +42,9 @@ const Header = ({ onOpenLogin, onOpenSignup, cart = [] }) => {
           setUserRole(storedRole);
         } else {
           try {
-            const response = await axios.get(`/auth/user/${currentUser.uid}`);
+            const response = await axios.get(
+              `/api/auth/user/${currentUser.uid}`
+            );
             const data = response.data;
 
             setUserRole(data.role);

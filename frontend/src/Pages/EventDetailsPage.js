@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import axios from "../axiosConfig";
 
 const EventDetailsPage = () => {
   const { id } = useParams();
@@ -10,9 +11,10 @@ const EventDetailsPage = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/event/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
+    const fetchEvent = async () => {
+      try {
+        const res = await axios.get(`/api/event/${id}`);
+        const data = res.data;
         setEvent(data);
         setFormData({
           title: data.title,
@@ -22,8 +24,12 @@ const EventDetailsPage = () => {
           needVolunteers: data.needVolunteers || false,
           volunteersRequired: data.volunteersRequired || "",
         });
-      })
-      .catch((err) => console.error("Error fetching event:", err));
+      } catch (err) {
+        console.error("Error fetching event:", err);
+      }
+    };
+
+    fetchEvent();
   }, [id]);
 
   const handleInputChange = (e) => {
@@ -33,33 +39,19 @@ const EventDetailsPage = () => {
 
   const handleDelete = async () => {
     try {
-      const response = await fetch(`/api/event/${id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        alert(errorData.error || "Failed to delete event");
-        return;
-      }
-
+      await axios.delete(`/api/event/${id}`);
       setShowDeleteModal(false);
       navigate("/events");
     } catch (error) {
+      const errMsg = error.response?.data?.error || "Error deleting event.";
       console.error("Error deleting event:", error);
-      alert("Error deleting event.");
+      alert(errMsg);
     }
   };
 
   const handleUpdate = async () => {
     try {
-      const response = await fetch(`/api/event/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) throw new Error("Failed to update event");
+      const res = await axios.put(`/api/event/${id}`, formData);
       setEvent({ ...event, ...formData });
       setEditMode(false);
     } catch (error) {

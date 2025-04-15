@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getAuth } from "firebase/auth";
+import axios from "../axiosConfig";
 
 const AdminPage = () => {
   const [users, setUsers] = useState([]);
@@ -16,11 +17,7 @@ const AdminPage = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/admin/users");
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      const data = await response.json();
+      const { data } = await axios.get("/api/admin/users");
       setUsers(data);
       setSelectedRoles(
         data.reduce((acc, user) => ({ ...acc, [user.email]: user.role }), {})
@@ -39,25 +36,19 @@ const AdminPage = () => {
   const updateRole = async (email) => {
     try {
       const token = await auth.currentUser.getIdToken();
-      const response = await fetch("/api/admin/update-role", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ email, newRole: selectedRoles[email] }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to update role");
-      }
+      const { data } = await axios.put(
+        "/api/admin/update-role",
+        { email, newRole: selectedRoles[email] },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
       showAlert("Role updated successfully!", "success");
       fetchUsers();
     } catch (error) {
-      showAlert(error.message, "error");
+      showAlert(
+        error.response?.data?.message || "Failed to update role",
+        "error"
+      );
       fetchUsers();
     }
   };

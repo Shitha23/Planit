@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
+import axios from "../axiosConfig";
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
@@ -12,8 +13,8 @@ const SponsorshipPage = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await fetch("/api/events/needsponsorship");
-        const data = await response.json();
+        const response = await axios.get("/api/events/needsponsorship");
+        const data = response.data;
         const now = new Date();
 
         const future = [];
@@ -55,10 +56,10 @@ const SponsorshipPage = () => {
     try {
       const stripe = await stripePromise;
 
-      const res = await fetch("/api/create-sponsorship-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sponsorId, eventId, amount }),
+      const res = await axios.post("/api/create-sponsorship-session", {
+        sponsorId,
+        eventId,
+        amount,
       });
 
       const data = await res.json();

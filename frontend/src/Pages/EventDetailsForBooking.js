@@ -7,6 +7,7 @@ import {
   FaUsers,
   FaShoppingCart,
 } from "react-icons/fa";
+import axios from "../axiosConfig";
 import EventQueryForm from "../Components/EventQueryForm";
 
 const EventDetailsForBooking = ({ cart, setCart }) => {
@@ -17,19 +18,29 @@ const EventDetailsForBooking = ({ cart, setCart }) => {
   const [alert, setAlert] = useState(null);
 
   useEffect(() => {
-    fetch(`/api/event/${id}`)
-      .then((res) => res.json())
-      .then((data) => setEvent(data))
-      .catch((err) => console.error("Error fetching event:", err));
+    const fetchEvent = async () => {
+      try {
+        const res = await axios.get(`/api/event/${id}`);
+        setEvent(res.data);
+      } catch (err) {
+        console.error("Error fetching event:", err);
+      }
+    };
+
+    fetchEvent();
   }, [id]);
 
   useEffect(() => {
-    fetch(`/api/tickets-sold/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setTicketsSold(data.ticketsSold);
-      })
-      .catch((err) => console.error("Error fetching tickets sold:", err));
+    const fetchTicketsSold = async () => {
+      try {
+        const res = await axios.get(`/api/tickets-sold/${id}`);
+        setTicketsSold(res.data.ticketsSold);
+      } catch (err) {
+        console.error("Error fetching tickets sold:", err);
+      }
+    };
+
+    fetchTicketsSold();
   }, [id]);
 
   const formatTime = (time) => {
