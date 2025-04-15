@@ -50,9 +50,7 @@ const EventsPage = () => {
       const response = await axios.get(`/api/events`, {
         params: { organizerId: userId },
       });
-      if (!response.ok) throw new Error("Failed to fetch events");
-      const data = await response.json();
-      setEvents(data);
+      setEvents(response.data);
     } catch (error) {
       console.error("Error fetching events:", error);
     }
@@ -136,10 +134,7 @@ const EventsPage = () => {
         organizerId: user.uid,
       });
 
-      if (!response.ok) throw new Error("Failed to create event");
-
-      const newEvent = await response.json();
-      setEvents([...events, newEvent.event]);
+      setEvents([...events, response.data.event]);
       setOpenModal(false);
       setStep(1);
       setEventData({
