@@ -21,6 +21,8 @@ const OrderSuccessPage = ({ setCart }) => {
 
       try {
         sessionStorage.setItem("orderCompleted", "true");
+        if (typeof setCart === "function") setCart([]);
+
         console.log("Order completed successfully");
         await axios.post("/api/order", {
           userId,
@@ -39,8 +41,6 @@ const OrderSuccessPage = ({ setCart }) => {
         sessionStorage.removeItem("cart");
         sessionStorage.removeItem("userId");
         sessionStorage.removeItem("totalAmount");
-
-        if (typeof setCart === "function") setCart([]);
       } catch (err) {
         sessionStorage.removeItem("orderCompleted");
       }
