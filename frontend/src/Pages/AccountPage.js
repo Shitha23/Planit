@@ -141,7 +141,6 @@ const AccountPage = () => {
     try {
       const res = await axios.put(`/api/users/${user.uid}`, userData);
 
-      if (!res.ok) throw new Error("Update failed");
       setMessage("Profile updated successfully!");
     } catch {
       setMessage("Failed to update profile.");
